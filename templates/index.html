@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Studio Narasi TTS Indonesia</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #238636;
+      --accent-hover: #2ea043;
+      --primary: #1f6feb;
+      --primary-hover: #388bfd;
+      --warning: #d29922;
+      --danger: #f85149;
+      --code-bg: #0b0f14;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 24px; min-height: 100vh; }
+    .container { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+
+    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+    .logo-area h1 { font-size: 1.4rem; font-weight: 700; color: #58a6ff; display: flex; align-items: center; gap: 8px; }
+    .logo-area p { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+    .status-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+    .status-badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; background: #21262d; border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 6px; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #e3b341; }
+    .status-dot.ready { background: #3fb950; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 850px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+    .card-title { font-size: 1rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; color: #f0f6fc; }
+    .step-tag { background: #1f6feb22; color: #58a6ff; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; border: 1px solid #1f6feb55; font-weight: 600; }
+
+    textarea {
+      width: 100%; height: 210px; background: var(--code-bg); color: var(--text);
+      border: 1px solid var(--border); border-radius: 6px; padding: 12px;
+      font-size: 0.9rem; line-height: 1.5; resize: vertical; outline: none;
+    }
+    textarea:focus { border-color: var(--primary); }
+
+    .stats-bar { display: flex; flex-wrap: wrap; gap: 12px; background: var(--code-bg); padding: 10px 14px; border-radius: 6px; border: 1px solid var(--border); font-size: 0.82rem; }
+    .stat-item { display: flex; flex-direction: column; }
+    .stat-label { color: var(--text-muted); font-size: 0.72rem; text-transform: uppercase; }
+    .stat-val { font-weight: 600; color: #58a6ff; }
+
+    .btn {
+      padding: 9px 16px; border-radius: 6px; border: none; font-size: 0.88rem;
+      font-weight: 600; cursor: pointer; display: inline-flex; align-items: center;
+      gap: 6px; justify-content: center; transition: all 0.15s;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-success { background: var(--accent); color: white; }
+    .btn-success:hover { background: var(--accent-hover); }
+    .btn-secondary { background: #21262d; color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: #30363d; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-group { display: flex; gap: 10px; align-items: center; }
+
+    .warning-box {
+      background: #341a04; border: 1px solid #9e6a03; border-radius: 6px;
+      padding: 8px 12px; font-size: 0.82rem; color: #f0883e; display: flex;
+      flex-direction: column; gap: 4px;
+    }
+
+    .info-box {
+      background: #0d2847; border: 1px solid #1f6feb; border-radius: 6px;
+      padding: 8px 12px; font-size: 0.82rem; color: #58a6ff;
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+    select, input[type="range"], input[type="text"] {
+      background: var(--code-bg); color: var(--text); border: 1px solid var(--border);
+      border-radius: 6px; padding: 10px; font-size: 0.9rem; outline: none;
+    }
+
+    .audio-player-box {
+      background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px;
+      padding: 14px; display: flex; flex-direction: column; gap: 10px;
+    }
+    audio { width: 100%; height: 38px; outline: none; }
+
+    .segments-list {
+      max-height: 180px; overflow-y: auto; background: var(--code-bg);
+      border: 1px solid var(--border); border-radius: 6px; padding: 8px;
+      display: flex; flex-direction: column; gap: 6px; font-size: 0.82rem;
+    }
+    .segment-item { padding: 6px 10px; background: #161b22; border-radius: 4px; border-left: 3px solid var(--primary); }
+
+    .spinner {
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: white; border-radius: 50%; width: 14px; height: 14px;
+      animation: spin 0.8s linear infinite; display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .history-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .history-table th, .history-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+    .history-table th { color: var(--text-muted); font-weight: 500; }
+    .badge { padding: 2px 6px; border-radius: 4px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; }
+    .badge-supertonic { background: #1f6feb22; color: #58a6ff; border: 1px solid #1f6feb55; }
+    .badge-pocket { background: #23863622; color: #3fb950; border: 1px solid #23863655; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo-area">
+        <h1>🎙️ Studio Narasi TTS Indonesia</h1>
+        <p>Alur produksi audio: Paste narasi &rarr; Pengecekan & Cleaning &rarr; Pilih Engine TTS &rarr; Generate Audio</p>
+      </div>
+      <div class="status-badges">
+        <div class="status-badge" id="badgeSupertonic">
+          <span class="status-dot" id="dotSupertonic"></span> Supertonic
+        </div>
+        <div class="status-badge" id="badgePocket">
+          <span class="status-dot" id="dotPocket"></span> Pocket-TTS
+        </div>
+        <div class="status-badge" id="badgeGemini">
+          <span class="status-dot" id="dotGemini"></span> Gemini
+        </div>
+        <div class="status-badge" id="badgeGemGw">
+          <span class="status-dot" id="dotGemGw"></span> OmniRoute
+        </div>
+      </div>
+    </header>
+
+    <div class="card">
+      <div class="form-group">
+        <label for="projectTitle">Judul Narasi (jadi nama folder hasil):</label>
+        <input type="text" id="projectTitle" placeholder="mis. Kota Rawa - Dunia Antara" oninput="updateFolderHint()">
+        <span id="folderHint" style="font-size:0.75rem; color:var(--text-muted);"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="form-group">
+        <label for="urlInput">Atau ambil naskah dari URL (isi artikel saja, via Jina Reader):</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="urlInput" style="flex:1;" placeholder="https://situs.com/artikel-atau-cerita">
+          <button class="btn btn-secondary" id="btnFetchUrl" onclick="fetchUrl()">🌐 Ambil</button>
+        </div>
+        <span style="font-size:0.75rem; color:var(--text-muted);">Alamat ini dikirim ke r.jina.ai untuk diambil isinya. Anda juga bisa menempel hasil Jina langsung ke kotak naskah, bagian navigasi dan iklan dibuang otomatis.</span>
+      </div>
+    </div>
+
+    <div class="btn-group" style="margin-bottom:14px;">
+      <button class="btn btn-primary" id="tabSingle" onclick="setMode('single')">📄 Tanpa Scene</button>
+      <button class="btn btn-secondary" id="tabScene" onclick="setMode('scene')">🎬 Dengan Scene</button>
+      <button class="btn btn-secondary" id="tabTheater" onclick="setMode('theater')">🎭 Teater (Multi-Tokoh)</button>
+    </div>
+
+    <!-- MODE SCENE -->
+    <div id="sceneMode" style="display:none;">
+      <div class="card">
+        <div class="card-title">
+          <span>1. Tempel Naskah Per Scene</span>
+          <span class="step-tag">Mode Scene</span>
+        </div>
+        <textarea id="sceneRaw" placeholder="Tempel 3-5 scene sekaligus. Pisahkan dengan baris kosong, atau baris 'Scene 1', 'Scene 2', '---', atau '***'.&#10;&#10;Scene 1&#10;Bagi jutaan pasang mata...&#10;&#10;Scene 2&#10;Jauh sebelum ia dipanggil..."></textarea>
+        <div style="font-size:0.75rem; color:var(--text-muted);">Petunjuk jeda: tulis <code>(Jeda 2 detik)</code> di tengah teks. Jeda dibuat sebagai hening, tidak dibaca.</div>
+        <div class="form-group">
+          <label for="groupWords">Gabung paragraf jadi scene ±<span id="gwVal">0</span> kata (0 = satu paragraf satu scene; tidak berlaku bila ada pemisah Scene/***):</label>
+          <input type="range" id="groupWords" min="0" max="400" step="20" value="0" oninput="document.getElementById('gwVal').innerText=this.value">
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-secondary" onclick="document.getElementById('sceneRaw').value='';renderScenes([])">Reset</button>
+          <button class="btn btn-primary" id="btnCleanScenes" onclick="doCleanScenes()">🧹 Rapikan / Bersihkan Scene</button>
+        </div>
+      </div>
+      <div class="card" id="sceneListCard" style="display:none;">
+        <div class="card-title"><span>2. Cek Tiap Scene (bisa diedit)</span><span class="step-tag" id="sceneCount"></span></div>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <button class="btn btn-secondary" id="btnAnnotateScenes" onclick="annotateScenes()">🎭 Petakan Ekspresi & Jeda (semua scene)</button>
+          <label style="font-size:0.75rem; color:var(--text-muted); display:flex; gap:6px; align-items:center;">
+            <input type="checkbox" id="annotAiScenes" checked> Pakai AI (cadangan: aturan tanda baca)
+          </label>
+        </div>
+        <div id="annotInfoScenes" class="warning-box" style="display:none;"></div>
+        <div id="sceneList" style="display:flex; flex-direction:column; gap:12px;"></div>
+      </div>
+    </div>
+
+    <!-- MODE TEATER -->
+    <div id="theaterMode" style="display:none;">
+      <div class="card">
+        <div class="card-title"><span>1. Tempel Cerita / Dongeng</span><span class="step-tag">Mode Teater</span></div>
+        <textarea id="theaterRaw" placeholder="Tempel cerita lengkap (boleh hasil Jina). AI memetakan scene, tokoh, dan siapa mengucapkan apa. Setelah itu Anda atur suara tiap tokoh."></textarea>
+        <label style="font-size:0.8rem; color:var(--text-muted); display:flex; gap:6px; align-items:center;">
+          <input type="checkbox" id="useAi" checked> Pakai AI (cadangan otomatis ke aturan generik bila AI gagal).
+          Teks dikirim ke gateway AI/Gemini yang Anda konfigurasi di .env.
+        </label>
+        <div class="btn-group">
+          <button class="btn btn-primary" id="btnDirect" onclick="doDirect()">🎬 Analisis Cerita</button>
+        </div>
+        <div id="directInfo" class="warning-box" style="display:none;"></div>
+      </div>
+
+      <div class="card" id="castCard" style="display:none;">
+        <div class="card-title"><span>2. Pemeran & Suara</span><span class="step-tag">Supertonic</span></div>
+        <div style="font-size:0.75rem; color:var(--text-muted);">Supertonic tidak punya suara anak. Tokoh anak memakai suara wanita dengan nada dinaikkan (geser nada). Atur sampai terdengar cocok, klik ▶ untuk mencoba.</div>
+        <div id="castList" style="display:flex; flex-direction:column; gap:10px;"></div>
+      </div>
+
+      <div class="card" id="theaterScenesCard" style="display:none;">
+        <div class="card-title"><span>3. Scene & Dialog (bisa dikoreksi)</span><span class="step-tag" id="theaterCount"></span></div>
+        <div id="theaterScenes" style="display:flex; flex-direction:column; gap:12px;"></div>
+      </div>
+    </div>
+
+    <div class="grid-2" id="singleMode">
+      <!-- LANGKAH 1: PASTE & CEK -->
+      <div class="card">
+        <div class="card-title">
+          <span>1. Masukkan Narasi Mentah</span>
+          <span class="step-tag">Langkah 1</span>
+        </div>
+        <textarea id="rawText" placeholder="Tempelkan naskah narasi mentah di sini...&#10;&#10;Contoh:&#10;Di dunia yang diliputi bintang khayal, kabut imajinasi, nama-nama dan impian, tak semua kenyataan lahir dari bayangan. Diskon 20% berlaku sd 30 Okt!" oninput="updateCharCount()"></textarea>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:0.75rem; color:var(--text-muted);" id="rawStats">0 karakter</span>
+          <div class="btn-group">
+            <button class="btn btn-secondary" onclick="clearInput()">Reset</button>
+            <button class="btn btn-primary" id="btnClean" onclick="doCleanText()">
+              🔍 Cek & Bersihkan Teks
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LANGKAH 2: HASIL CLEANING & REVIEW -->
+      <div class="card">
+        <div class="card-title">
+          <span>2. Hasil Cleaning & Normalisasi</span>
+          <span class="step-tag">Langkah 2</span>
+        </div>
+        
+        <div class="stats-bar">
+          <div class="stat-item">
+            <span class="stat-label">Kata</span>
+            <span class="stat-val" id="statWords">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Karakter</span>
+            <span class="stat-val" id="statChars">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Est. Durasi</span>
+            <span class="stat-val" id="statDuration">-</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Segmen Kalimat</span>
+            <span class="stat-val" id="statSegments">0</span>
+          </div>
+        </div>
+
+        <div id="warningBox" class="warning-box" style="display:none;"></div>
+
+        <textarea id="cleanedText" oninput="updateEta()" placeholder="Teks yang telah dibersihkan & dinormalisasi akan muncul di sini. Anda dapat mengubah kata atau pelafalan secara manual sebelum audio digenerate..."></textarea>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <button class="btn btn-secondary" id="btnAnnotate" onclick="annotateSingle()">🎭 Petakan Ekspresi & Jeda</button>
+          <label style="font-size:0.75rem; color:var(--text-muted); display:flex; gap:6px; align-items:center;">
+            <input type="checkbox" id="annotAi" checked> Pakai AI (cadangan: aturan tanda baca)
+          </label>
+        </div>
+        <div id="annotInfo" class="warning-box" style="display:none;"></div>
+        <div style="font-size:0.72rem; color:var(--text-muted);">Menyisipkan penanda <code>[emosi sedih]</code> dan <code>[jeda 1.2]</code> yang bisa diedit. Supertonic: emosi mengatur tempo baca. Pocket-TTS: hanya jeda yang dipakai.</div>
+
+        <details>
+          <summary style="font-size:0.8rem; color:var(--text-muted); cursor:pointer; margin-top:2px;">
+            Lihat daftar segmen kalimat (<span id="segmentCountLabel">0</span>)
+          </summary>
+          <div class="segments-list" id="segmentsList">
+            <div style="color:var(--text-muted); text-align:center; padding:10px;">Belum ada segmen.</div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- LANGKAH 3: OPSI ENGINE & GENERATE AUDIO -->
+    <div class="card">
+      <div class="card-title">
+        <span>3. Pilih Engine & Karakter Suara</span>
+        <span class="step-tag">Langkah 3</span>
+      </div>
+
+      <div class="grid-2">
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <!-- Pilih Engine -->
+          <div class="form-group">
+            <label for="engineSelect">Engine TTS:</label>
+            <select id="engineSelect" onchange="onEngineChange()">
+              <option value="supertonic">⚡ Supertonic (Rekomendasi - Cepat & 44.1 kHz)</option>
+              <option value="pocket_tts">🎭 Pocket-TTS (Kloning Sampel Suara 24 kHz)</option>
+            </select>
+            <div id="engineDesc" style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;"></div>
+          </div>
+
+          <!-- Gaya bacaan (khusus Gemini TTS) -->
+          <div class="form-group" id="styleWrapper" style="display:none;">
+            <label for="styleInput">Gaya bacaan (Gemini):</label>
+            <input type="text" id="styleInput" placeholder="mis. Rich, unhurried storytelling narration in Indonesian">
+            <span style="font-size:0.72rem; color:var(--text-muted);">Bahasa Inggris paling stabil. Emosi dari <code>[emosi X]</code> ditambahkan otomatis.</span>
+          </div>
+
+          <!-- Kecepatan (Khusus Supertonic) -->
+          <div class="form-group" id="speedWrapper">
+            <label for="speedRange">Kecepatan Bicara: <span id="speedVal" style="color:#58a6ff; font-weight:600;">1.00x</span></label>
+            <input type="range" id="speedRange" min="0.8" max="1.3" step="0.05" value="1.0" oninput="document.getElementById('speedVal').innerText = parseFloat(this.value).toFixed(2) + 'x'">
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <!-- Pilih Suara -->
+          <div class="form-group">
+            <label for="voiceSelect">Karakter Suara:</label>
+            <div style="display:flex; gap:8px;">
+              <select id="voiceSelect" style="flex:1;">
+                <option value="">Memuat pilihan suara...</option>
+              </select>
+              <button class="btn btn-secondary" id="btnPreviewVoice" title="Dengarkan sampel suara ini" onclick="playVoiceSample()" style="display:none;">
+                ▶ Sampel
+              </button>
+            </div>
+            <audio id="sampleAudioPlayer" style="display:none;"></audio>
+          </div>
+
+          <!-- Tombol Generate -->
+          <div style="margin-top:auto;">
+            <button class="btn btn-success" id="btnGenerate" style="width:100%; height:44px; font-size:1rem;" onclick="generate()">
+              🔊 Generate Audio Narasi
+            </button>
+            <div id="etaInfo" style="font-size:0.78rem; color:var(--text-muted); margin-top:6px; text-align:center;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="engineNotice" class="warning-box" style="display:none;"></div>
+
+      <div class="audio-player-box" id="sceneResult" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+          <strong style="color:#58a6ff; font-size:0.9rem;" id="sceneResultTitle">Hasil Scene</strong>
+          <a id="btnZip" class="btn btn-secondary" href="#" style="display:none;">⬇️ Download ZIP</a>
+        </div>
+        <div id="sceneResultList" style="display:flex; flex-direction:column; gap:8px;"></div>
+      </div>
+
+      <!-- PLAYER HASIL -->
+      <div class="audio-player-box" id="resultBox" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+          <strong style="color:#58a6ff; font-size:0.9rem;">🎉 Audio Narasi Berhasil Dibuat:</strong>
+          <span id="audioMeta" style="font-size:0.78rem; color:var(--text-muted);"></span>
+        </div>
+        <audio id="mainAudioPlayer" controls></audio>
+        <div style="display:flex; gap:10px;">
+          <a id="btnDownload" class="btn btn-secondary" href="#" download>
+            ⬇️ Download WAV
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIWAYAT GENERATE -->
+    <div class="card">
+      <div class="card-title">
+        <span>Riwayat Produksi Narasi</span>
+        <button class="btn btn-secondary" style="padding:4px 10px; font-size:0.75rem;" onclick="loadHistory()">
+          🔄 Segarkan
+        </button>
+      </div>
+      <div id="folderHistory" style="margin-bottom:10px;"></div>
+      <div style="overflow-x:auto;">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Waktu</th>
+              <th>Engine</th>
+              <th>Nama File</th>
+              <th>Suara</th>
+              <th>Ukuran</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody">
+            <tr><td colspan="6" style="color:var(--text-muted); text-align:center;">Memuat riwayat...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let optionsData = { engines: [] };
+
+
+
+
+    // ---- Pemetaan ekspresi & jeda (mode tanpa scene / dengan scene) ----
+    async function callAnnotate(texts, useAi) {
+      const res = await fetch('/api/annotate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ texts, use_ai: useAi })
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.message || 'Gagal');
+      return data.results;
+    }
+
+    function showInfo(id, results) {
+      const el = document.getElementById(id);
+      const modes = results.map(r => r.info.mode);
+      const ai = modes.filter(m => m === 'ai').length;
+      el.style.display = 'flex';
+      el.innerText = ai === results.length ? '🤖 ' + results[0].info.note
+        : ai > 0 ? `🤖 ${ai}/${results.length} scene dipetakan AI, sisanya aturan tanda baca.`
+        : '📏 ' + results[0].info.note;
+    }
+
+    async function annotateSingle() {
+      let text = document.getElementById('cleanedText').value.trim();
+      if (!text) {
+        const raw = document.getElementById('rawText').value.trim();
+        if (!raw) { alert('Isi dan bersihkan teks narasi terlebih dahulu.'); return; }
+        await doCleanText();
+        text = document.getElementById('cleanedText').value.trim();
+      }
+      const btn = document.getElementById('btnAnnotate');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Memetakan...';
+      try {
+        const [r] = await callAnnotate([text], document.getElementById('annotAi').checked);
+        document.getElementById('cleanedText').value = r.text;
+        showInfo('annotInfo', [r]);
+        updateEta();
+      } catch (err) {
+        alert('Gagal memetakan ekspresi: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '🎭 Petakan Ekspresi & Jeda';
+      }
+    }
+
+    async function annotateScenes() {
+      if (!scenes.length) { alert("Klik 'Rapikan / Bersihkan Scene' dulu."); return; }
+      const btn = document.getElementById('btnAnnotateScenes');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Memetakan semua scene...';
+      try {
+        const texts = scenes.map((_, i) => document.getElementById('sceneText' + i).value);
+        const results = await callAnnotate(texts, document.getElementById('annotAiScenes').checked);
+        results.forEach((r, i) => { document.getElementById('sceneText' + i).value = r.text; });
+        showInfo('annotInfoScenes', results);
+        updateEta();
+      } catch (err) {
+        alert('Gagal memetakan ekspresi: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '🎭 Petakan Ekspresi & Jeda (semua scene)';
+      }
+    }
+
+    // ---- Mode teater ----
+    let theater = { characters: [], scenes: [] };
+    let theaterD3 = false;
+    let theaterGem = false;
+    let theaterGemGw = false;
+    const EMOTIONS = ['netral','senang','sedih','marah','takut','kaget','berbisik','tegas','lembut','licik','menggoda'];
+
+    async function doDirect() {
+      const text = document.getElementById('theaterRaw').value.trim();
+      if (!text) { alert('Tempel cerita terlebih dahulu.'); return; }
+      const btn = document.getElementById('btnDirect');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> AI sedang memetakan cerita (bisa 1-2 menit)...';
+      try {
+        const res = await fetch('/api/direct', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, use_ai: document.getElementById('useAi').checked })
+        });
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.message || 'Gagal');
+        theater = { characters: data.characters, scenes: data.scenes, title: data.title };
+        theaterD3 = !!data.drama3_available;
+        theaterGem = !!data.gemini_available;
+        theaterGemGw = !!data.gemini_gw_available;
+        adoptTitle(data.title);
+        const info = document.getElementById('directInfo');
+        info.style.display = 'flex';
+        info.innerText = (data.info.mode === 'ai' ? '🤖 ' : '📏 ') + data.info.note;
+        renderTheater();
+      } catch (err) {
+        alert('Gagal menganalisis cerita: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '🎬 Analisis Cerita';
+      }
+    }
+
+    function geminiVoices() {
+      const eng = (optionsData.engines || []).find(e => e.id === 'gemini_tts' || e.id === 'gemini_gw');
+      return eng ? eng.voices : [];
+    }
+
+    function supertonicVoices() {
+      const eng = (optionsData.engines || []).find(e => e.id === 'supertonic');
+      return eng ? eng.voices : [];
+    }
+
+    function renderTheater() {
+      const voices = supertonicVoices();
+      document.getElementById('castCard').style.display = theater.characters.length ? '' : 'none';
+      document.getElementById('castList').innerHTML = theater.characters.map((c, i) => `
+        <div style="border:1px solid var(--border); border-radius:8px; padding:10px; display:flex; flex-direction:column; gap:8px; font-size:0.8rem;">
+        <div style="display:grid; grid-template-columns: 1.2fr 1.6fr 1fr 1fr auto; gap:8px; align-items:center;">
+          <div><strong>${esc(c.name)}</strong><br><span style="color:var(--text-muted);">${esc(c.gender)} • ${esc(c.age)}</span></div>
+          <select onchange="theater.characters[${i}].voice=this.value">
+            ${voices.map(v => `<option value="${v.id}" ${v.id === c.voice ? 'selected' : ''}>${esc(v.name)}</option>`).join('')}
+          </select>
+          <label>Nada <b id="pv${i}">${c.pitch > 0 ? '+' : ''}${c.pitch}</b>
+            <input type="range" min="-6" max="8" step="0.5" value="${c.pitch}" style="width:100%"
+              oninput="theater.characters[${i}].pitch=parseFloat(this.value); document.getElementById('pv${i}').innerText=(this.value>0?'+':'')+this.value"></label>
+          <label>Cepat <b id="sv${i}">${Number(c.speed).toFixed(2)}x</b>
+            <input type="range" min="0.8" max="1.3" step="0.02" value="${c.speed}" style="width:100%"
+              oninput="theater.characters[${i}].speed=parseFloat(this.value); document.getElementById('sv${i}').innerText=parseFloat(this.value).toFixed(2)+'x'"></label>
+          <button class="btn btn-secondary" id="tryBtn${i}" onclick="tryVoice(${i})">▶ Coba</button>
+        </div>
+        <div style="display:grid; grid-template-columns: 200px 1fr; gap:8px; align-items:center;">
+          <select onchange="theater.characters[${i}].provider=this.value; renderTheater()">
+            <option value="supertonic" ${c.provider !== 'drama3' ? 'selected' : ''}>Mesin: Supertonic (lokal)</option>
+            <option value="gemini_tts" ${c.provider === 'gemini_tts' ? 'selected' : ''} ${theaterGem ? '' : 'disabled'}>Mesin: Gemini TTS (cloud)${theaterGem ? '' : ' - isi GEMINI_KEY'}</option>
+            <option value="gemini_gw" ${c.provider === 'gemini_gw' ? 'selected' : ''} ${theaterGemGw ? '' : 'disabled'}>Mesin: Gemini via OmniRoute (cepat, gaya terbatas)${theaterGemGw ? '' : ' - OmniRoute belum diset'}</option>
+            <option value="drama3" ${c.provider === 'drama3' ? 'selected' : ''} ${theaterD3 ? '' : 'disabled'}>Mesin: Drama 3 (cloud)${theaterD3 ? '' : ' - isi HF_TOKEN'}</option>
+          </select>
+          ${(c.provider === 'gemini_tts' || c.provider === 'gemini_gw')
+            ? `<select onchange="theater.characters[${i}].gemini_voice=this.value">${geminiVoices().map(v => `<option value="${v.id}" ${v.id === (c.gemini_voice || 'Zubenelgenubi') ? 'selected' : ''}>${esc(v.name)}</option>`).join('')}</select>`
+            : c.provider === 'drama3'
+            ? `<input type="text" value="${esc(c.voice_description || '')}" placeholder="Deskripsi suara (Inggris), mis. a young girl about eight, bright and gentle"
+                 oninput="theater.characters[${i}].voice_description=this.value">`
+            : `<span style="color:var(--text-muted);">Suara cadangan bila Drama 3 gagal: ${esc(c.voice)}</span>`}
+        </div>
+        </div>`).join('') + '<audio id="tryAudio" style="display:none;"></audio>';
+
+      const names = theater.characters.map(c => c.name);
+      document.getElementById('theaterScenesCard').style.display = theater.scenes.length ? '' : 'none';
+      document.getElementById('theaterCount').innerText = theater.scenes.length + ' scene';
+      document.getElementById('theaterScenes').innerHTML = theater.scenes.map((sc, si) => `
+        <details ${si === 0 ? 'open' : ''} style="border:1px solid var(--border); border-radius:8px; padding:8px;">
+          <summary style="cursor:pointer; font-size:0.85rem;"><strong>Scene ${si + 1}</strong> ${esc(sc.title || '')}
+            <span style="color:var(--text-muted);"> • ${sc.lines.length} baris</span></summary>
+          <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
+            ${sc.lines.map((l, li) => `
+              <div style="display:grid; grid-template-columns: 140px 1fr 105px 62px; gap:6px; align-items:start;">
+                <select onchange="theater.scenes[${si}].lines[${li}].speaker=this.value" style="padding:6px; font-size:0.8rem;">
+                  ${names.map(n => `<option ${n === l.speaker ? 'selected' : ''}>${esc(n)}</option>`).join('')}
+                </select>
+                <input type="text" value="${esc(l.text)}" style="padding:6px; font-size:0.8rem;"
+                  oninput="theater.scenes[${si}].lines[${li}].text=this.value">
+                <select title="Emosi" onchange="theater.scenes[${si}].lines[${li}].emotion=this.value" style="padding:6px; font-size:0.8rem;">
+                  ${EMOTIONS.map(e => `<option ${e === (l.emotion || 'netral') ? 'selected' : ''}>${e}</option>`).join('')}
+                </select>
+                <input type="number" title="Jeda sesudah baris (detik)" min="0" max="5" step="0.1" value="${l.pause || 0}"
+                  style="padding:6px; font-size:0.8rem;" oninput="theater.scenes[${si}].lines[${li}].pause=parseFloat(this.value)||0">
+              </div>`).join('')}
+          </div>
+        </details>`).join('');
+      updateEta();
+    }
+
+    function lineSettings(l) {
+      const c = theater.characters.find(x => x.name === l.speaker) || theater.characters[0];
+      return {
+        text: l.text, voice: c.voice, speed: c.speed, pitch: c.pitch,
+        provider: c.provider || 'supertonic', name: c.name,
+        description: c.voice_description || '', emotion: l.emotion || 'netral', pause: l.pause || 0,
+        gemini_voice: c.gemini_voice || 'Zubenelgenubi',
+      };
+    }
+
+    async function tryVoice(i) {
+      const c = theater.characters[i];
+      const sample = (theater.scenes.flatMap(s => s.lines).find(l => l.speaker === c.name) || {}).text
+        || 'Halo, ini contoh suara saya dalam cerita ini.';
+      const btn = document.getElementById('tryBtn' + i);
+      btn.disabled = true; btn.innerText = '...';
+      try {
+        const res = await fetch('/api/synthesize', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ preview: true, lines: [{ ...lineSettings({ speaker: c.name, text: sample.slice(0, 160) }) }] })
+        });
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.message || 'Gagal');
+        const a = document.getElementById('tryAudio');
+        a.src = data.audio_url + '?t=' + Date.now();
+        a.play().catch(() => {});
+      } catch (err) {
+        alert('Gagal mencoba suara: ' + err.message);
+      } finally {
+        btn.disabled = false; btn.innerText = '▶ Coba';
+      }
+    }
+
+    async function generateTheater() {
+      if (!theater.scenes.length) { alert("Klik 'Analisis Cerita' dulu."); return; }
+      const title = document.getElementById('projectTitle').value.trim();
+      if (!title && !confirm('Judul kosong, folder akan bernama otomatis. Lanjutkan?')) return;
+      await runSceneJobs(theater.scenes.map(sc => ({
+        body: { lines: sc.lines.map(lineSettings), title },
+        estSec: estAudioSec(sc.lines.map(l => l.text).join(' ')),
+      })), 'supertonic', title);
+    }
+
+    // ---- Estimasi waktu proses ----
+    // Rasio waktu-proses / durasi-audio per engine; awalnya tebakan, lalu belajar dari hasil nyata.
+    const DEFAULT_RTF = { supertonic: 0.5, pocket_tts: 3.8, gemini_tts: 0.5, gemini_gw: 0.3 };
+
+    function getRtf(engine) {
+      try {
+        const v = parseFloat(localStorage.getItem('rtf_' + engine));
+        if (v > 0) return v;
+      } catch (e) {}
+      return DEFAULT_RTF[engine] || 3;
+    }
+
+    function learnRtf(engine, procSec, audioSec) {
+      if (!(procSec > 0 && audioSec > 2)) return;
+      const ratio = procSec / audioSec;
+      const mixed = 0.5 * getRtf(engine) + 0.5 * ratio;
+      try { localStorage.setItem('rtf_' + engine, mixed.toFixed(3)); } catch (e) {}
+    }
+
+    function fmtDur(sec) {
+      sec = Math.max(0, Math.round(sec));
+      const m = Math.floor(sec / 60), r = sec % 60;
+      return m ? `${m}m ${r}s` : `${r}s`;
+    }
+
+    // Perkiraan durasi audio: ~140 kata/menit + durasi penanda jeda
+    function estAudioSec(text) {
+      let pause = 0;
+      const clean = (text || '').replace(/[\(\[]\s*emosi\s*:?\s*[A-Za-z]+\s*[\)\]]/gi, ' ').replace(/[\(\[]\s*jeda\s*(\d+(?:[.,]\d+)?)?\s*(?:detik|dtk|s)?\s*[\)\]]/gi,
+        (m, n) => { pause += n ? parseFloat(n.replace(',', '.')) : 1; return ' '; });
+      const words = clean.split(/\s+/).filter(Boolean).length;
+      return words / 140 * 60 + pause;
+    }
+
+    function currentTexts() {
+      if (mode === 'theater') {
+        return (theater.scenes || []).map(sc => sc.lines.map(l => l.text).join(' '));
+      }
+      if (mode === 'scene') {
+        return scenes.map((_, i) => (document.getElementById('sceneText' + i) || {}).value || '');
+      }
+      const t = document.getElementById('cleanedText').value.trim() || document.getElementById('rawText').value.trim();
+      return t ? [t] : [];
+    }
+
+    function updateEta() {
+      const el = document.getElementById('etaInfo');
+      if (!el) return;
+      const engine = document.getElementById('engineSelect').value;
+      const audio = currentTexts().reduce((a, t) => a + estAudioSec(t), 0);
+      if (!audio) { el.innerText = ''; return; }
+      el.innerText = `Perkiraan audio ±${fmtDur(audio)} • waktu proses ±${fmtDur(audio * getRtf(engine))}`;
+    }
+
+    let etaTimer = null;
+    function startEta(totalSec, labelFn) {
+      const t0 = Date.now();
+      const el = document.getElementById('etaInfo');
+      stopEta();
+      etaTimer = setInterval(() => {
+        const el_s = (Date.now() - t0) / 1000;
+        const left = totalSec - el_s;
+        el.innerText = labelFn(el_s, left);
+      }, 1000);
+    }
+    function stopEta() { if (etaTimer) { clearInterval(etaTimer); etaTimer = null; } }
+
+    let mode = 'single';
+    let scenes = [];
+
+
+    function adoptTitle(t) {
+      const el = document.getElementById('projectTitle');
+      if (t && !el.value.trim()) { el.value = t; updateFolderHint(); }
+    }
+
+    async function fetchUrl() {
+      const url = document.getElementById('urlInput').value.trim();
+      if (!url) { alert('Isi URL terlebih dahulu.'); return; }
+      const btn = document.getElementById('btnFetchUrl');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Mengambil...';
+      try {
+        const res = await fetch('/api/fetch_url', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.message || 'Gagal');
+        adoptTitle(data.title);
+        if (mode === 'scene') document.getElementById('sceneRaw').value = data.text;
+        else { document.getElementById('rawText').value = data.text; updateCharCount(); }
+      } catch (err) {
+        alert('Gagal mengambil naskah dari URL: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '🌐 Ambil';
+      }
+    }
+
+    function slugify(t) {
+      return t.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+    }
+
+    function updateFolderHint() {
+      const slug = slugify(document.getElementById('projectTitle').value);
+      document.getElementById('folderHint').innerText = slug ? 'Folder: output/' + slug + '/' : '';
+    }
+
+    function setMode(m) {
+      mode = m;
+      document.getElementById('singleMode').style.display = m === 'single' ? '' : 'none';
+      document.getElementById('sceneMode').style.display = m === 'scene' ? '' : 'none';
+      document.getElementById('theaterMode').style.display = m === 'theater' ? '' : 'none';
+      document.getElementById('tabTheater').className = 'btn ' + (m === 'theater' ? 'btn-primary' : 'btn-secondary');
+      document.getElementById('tabSingle').className = 'btn ' + (m === 'single' ? 'btn-primary' : 'btn-secondary');
+      document.getElementById('tabScene').className = 'btn ' + (m === 'scene' ? 'btn-primary' : 'btn-secondary');
+      updateEta();
+    }
+
+    function esc(t) {
+      return String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    }
+
+    function generate() {
+      return mode === 'theater' ? generateTheater() : mode === 'scene' ? generateScenes() : generateAudio();
+    }
+
+    async function doCleanScenes() {
+      const text = document.getElementById('sceneRaw').value.trim();
+      if (!text) { alert('Tempel naskah scene terlebih dahulu.'); return; }
+      const btn = document.getElementById('btnCleanScenes');
+      btn.disabled = true;
+      try {
+        const res = await fetch('/api/clean_scenes', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, group_words: parseInt(document.getElementById('groupWords').value) || 0 })
+        });
+        const sd = await res.json();
+        adoptTitle(sd.title);
+        renderScenes(sd.scenes || []);
+      } catch (err) {
+        alert('Gagal merapikan scene: ' + err.message);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function renderScenes(list) {
+      scenes = list;
+      document.getElementById('sceneListCard').style.display = list.length ? '' : 'none';
+      document.getElementById('sceneCount').innerText = list.length + ' scene';
+      setTimeout(updateEta, 0);
+      document.getElementById('sceneList').innerHTML = list.map((sc, i) => `
+        <div style="border:1px solid var(--border); border-radius:8px; padding:10px; display:flex; flex-direction:column; gap:6px;">
+          <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+            <strong>Scene ${sc.index}</strong>
+            <span style="color:var(--text-muted);">${sc.word_count} kata • ${esc(sc.estimated_duration)}</span>
+          </div>
+          <textarea id="sceneText${i}" style="min-height:90px;">${esc(sc.cleaned_text)}</textarea>
+          ${sc.english_words && sc.english_words.length ? `<div class="warning-box" style="display:flex;">Kata Inggris: ${esc(sc.english_words.join(', '))}</div>` : ''}
+        </div>`).join('');
+    }
+
+    async function generateScenes() {
+      if (!scenes.length) { alert("Klik 'Rapikan / Bersihkan Scene' dulu."); return; }
+      const engine = document.getElementById('engineSelect').value;
+      const voice = document.getElementById('voiceSelect').value;
+      const speed = parseFloat(document.getElementById('speedRange').value) || 1.0;
+      const title = document.getElementById('projectTitle').value.trim();
+      if (!title && !confirm('Judul kosong, folder akan bernama otomatis. Lanjutkan?')) return;
+      await runSceneJobs(scenes.map((_, i) => {
+        const text = document.getElementById('sceneText' + i).value.trim();
+        return { body: { engine, text, voice, speed, title, style: document.getElementById('styleInput').value.trim() }, estSec: estAudioSec(text) };
+      }), engine, title);
+    }
+
+    // Jalankan satu permintaan sintesis per scene secara berurutan, dengan progres, ETA, dan ZIP.
+    // jobs: [{ body: {...payload /api/synthesize tanpa 'scene'}, estSec: perkiraan durasi audio }]
+    async function runSceneJobs(jobs, engine, title) {
+      const btn = document.getElementById('btnGenerate');
+      const listEl = document.getElementById('sceneResultList');
+      document.getElementById('sceneResult').style.display = 'flex';
+      listEl.innerHTML = '';
+      document.getElementById('btnZip').style.display = 'none';
+      document.getElementById('sceneResultTitle').innerText = 'Memproses scene...';
+      btn.disabled = true;
+
+      let folder = '', okCount = 0, curIdx = 0;
+      const t0 = Date.now();
+      let curStart = t0;
+      stopEta();
+      etaTimer = setInterval(() => {
+        const cur = (Date.now() - curStart) / 1000;
+        let left = Math.max(0, jobs[curIdx].estSec * getRtf(engine) - cur);
+        for (let j = curIdx + 1; j < jobs.length; j++) left += jobs[j].estSec * getRtf(engine);
+        document.getElementById('etaInfo').innerText =
+          `Scene ${curIdx + 1}/${jobs.length} • berjalan ${fmtDur((Date.now() - t0) / 1000)} • sisa ±${fmtDur(left)}`;
+      }, 1000);
+
+      for (let i = 0; i < jobs.length; i++) {
+        curIdx = i; curStart = Date.now();
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex; flex-direction:column; gap:4px; font-size:0.8rem;';
+        row.innerHTML = `<span>Scene ${i + 1}: <span class="spinner"></span> memproses...</span>`;
+        listEl.appendChild(row);
+        btn.innerHTML = `<span class="spinner"></span> Scene ${i + 1}/${jobs.length} (${engine})...`;
+        try {
+          const res = await fetch('/api/synthesize', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...jobs[i].body, scene: i + 1 })
+          });
+          const data = await res.json();
+          if (!data.ok) throw new Error(data.message || 'Gagal');
+          okCount++;
+          folder = data.folder;
+          document.getElementById('sceneResultTitle').innerText = 'Folder: output/' + folder;
+          learnRtf(engine, data.process_time_sec, data.duration_sec);
+          row.innerHTML = `<span>Scene ${i + 1} • ${data.duration} • <code>${esc(data.filename)}</code></span>
+            <audio controls src="${data.audio_url}?t=${Date.now()}"></audio>`
+            + (data.warnings || []).map(w => `<span style="color:#e3b341;">⚠️ ${esc(w)}</span>`).join('');
+        } catch (err) {
+          row.innerHTML = `<span style="color:var(--danger);">Scene ${i + 1} gagal: ${esc(err.message)}</span>`;
+        }
+      }
+
+      stopEta();
+      document.getElementById('etaInfo').innerText = `Selesai dalam ${fmtDur((Date.now() - t0) / 1000)}`;
+      if (okCount) {
+        const z = document.getElementById('btnZip');
+        z.href = '/api/zip/' + folder;
+        z.style.display = '';
+      }
+      btn.disabled = false;
+      btn.innerHTML = '🔊 Generate Audio Narasi';
+      loadHistory();
+    }
+
+    function updateCharCount() {
+      const len = document.getElementById('rawText').value.length;
+      document.getElementById('rawStats').innerText = `${len} karakter`;
+      updateEta();
+    }
+
+    function clearInput() {
+      document.getElementById('rawText').value = '';
+      updateCharCount();
+    }
+
+    async function checkHealth() {
+      try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        const eng = data.engines || {};
+        
+        updateDot('dotSupertonic', eng.supertonic);
+        updateDot('dotPocket', eng.pocket_tts);
+        updateDot('dotGemini', eng.gemini_tts);
+        updateDot('dotGemGw', eng.gemini_gw);
+      } catch (err) {}
+    }
+
+    function updateDot(dotId, statusObj) {
+      const dot = document.getElementById(dotId);
+      if (!dot || !statusObj) return;
+      if (statusObj.ready) {
+        dot.className = 'status-dot ready';
+      } else {
+        dot.className = 'status-dot';
+      }
+    }
+
+    async function loadOptions() {
+      try {
+        const res = await fetch('/api/options');
+        optionsData = await res.json();
+        renderEngineOptions();
+      } catch (err) {
+        console.error("Gagal memuat opsi engine", err);
+      }
+    }
+
+    function renderEngineOptions() {
+      const engSelect = document.getElementById('engineSelect');
+      engSelect.innerHTML = '';
+      (optionsData.engines || []).forEach(e => {
+        const opt = document.createElement('option');
+        opt.value = e.id;
+        opt.innerText = e.name;
+        engSelect.appendChild(opt);
+      });
+      onEngineChange();
+    }
+
+    function onEngineChange() {
+      const engId = document.getElementById('engineSelect').value;
+      const engine = (optionsData.engines || []).find(e => e.id === engId);
+      if (!engine) return;
+
+      document.getElementById('engineDesc').innerText = engine.description;
+      updateEta();
+
+      // Speed slider
+      document.getElementById('speedWrapper').style.display = engine.supports_speed ? 'flex' : 'none';
+      const sw = document.getElementById('styleWrapper');
+      sw.style.display = engine.supports_style ? 'flex' : 'none';
+      if (engine.supports_style) { const si = document.getElementById('styleInput'); si.placeholder = engine.default_style || ''; }
+
+      // Preview button
+      document.getElementById('btnPreviewVoice').style.display = engine.supports_preview ? 'inline-flex' : 'none';
+
+      // Catatan mesin cloud (teks dikirim keluar)
+      const notice = document.getElementById('engineNotice');
+      const cloud = { gemini_tts: 'Teks dikirim ke Google (Gemini). Batas ±4 panggilan/menit diatur otomatis; narasi panjang butuh beberapa menit.',
+                      gemini_gw: 'Teks dikirim ke Google lewat gateway OmniRoute. Cepat dan tanpa batas beruntun, tetapi gaya bacaan nyaris tidak berpengaruh.' };
+      if (cloud[engId]) { notice.style.display = 'block'; notice.innerText = '☁️ ' + cloud[engId]; }
+      else { notice.style.display = 'none'; }
+
+      // Populate Voices
+      const voiceSelect = document.getElementById('voiceSelect');
+      voiceSelect.innerHTML = '';
+      (engine.voices || []).forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.id;
+        opt.innerText = v.name;
+        voiceSelect.appendChild(opt);
+      });
+    }
+
+    function playVoiceSample() {
+      const sel = document.getElementById('voiceSelect').value;
+      if (!sel) return;
+      const player = document.getElementById('sampleAudioPlayer');
+      player.src = `/api/sample/${sel}`;
+      player.play().catch(e => console.log('Audio play error:', e));
+    }
+
+    async function doCleanText() {
+      const text = document.getElementById('rawText').value.trim();
+      if (!text) {
+        alert("Silakan tempel teks narasi terlebih dahulu.");
+        return;
+      }
+
+      const btn = document.getElementById('btnClean');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Memproses...';
+
+      try {
+        const res = await fetch('/api/clean', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+        const data = await res.json();
+        adoptTitle(data.title);
+
+        document.getElementById('cleanedText').value = data.cleaned_text || '';
+        setTimeout(updateEta, 0);
+        document.getElementById('statWords').innerText = data.word_count || 0;
+        document.getElementById('statChars').innerText = data.char_count || 0;
+        document.getElementById('statDuration').innerText = data.estimated_duration || '-';
+        document.getElementById('statSegments').innerText = data.segment_count || 0;
+        document.getElementById('segmentCountLabel').innerText = data.segment_count || 0;
+
+        const warnBox = document.getElementById('warningBox');
+        if (data.warnings && data.warnings.length > 0) {
+          warnBox.style.display = 'flex';
+          warnBox.innerHTML = '<strong>Catatan Pengecekan:</strong>' + data.warnings.map(w => `• ${w}`).join('<br>');
+        } else {
+          warnBox.style.display = 'none';
+        }
+
+        const segContainer = document.getElementById('segmentsList');
+        if (data.segments && data.segments.length > 0) {
+          segContainer.innerHTML = data.segments.map((s, idx) => 
+            `<div class="segment-item"><strong>#${idx+1}:</strong> ${s}</div>`
+          ).join('');
+        } else {
+          segContainer.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:10px;">Belum ada segmen.</div>';
+        }
+
+      } catch (err) {
+        alert("Gagal melakukan pengecekan teks: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '🔍 Cek & Bersihkan Teks';
+      }
+    }
+
+    async function generateAudio() {
+      let text = document.getElementById('cleanedText').value.trim();
+      if (!text) {
+        const raw = document.getElementById('rawText').value.trim();
+        if (!raw) {
+          alert("Silakan masukkan teks narasi terlebih dahulu.");
+          return;
+        }
+        await doCleanText();
+        text = document.getElementById('cleanedText').value.trim();
+      }
+
+      const engine = document.getElementById('engineSelect').value;
+      const voice = document.getElementById('voiceSelect').value;
+      const speed = parseFloat(document.getElementById('speedRange').value) || 1.0;
+
+      const btn = document.getElementById('btnGenerate');
+      btn.disabled = true;
+      btn.innerHTML = `<span class="spinner"></span> Sedang Men-sintesis (${engine})...`;
+      const estTotal = estAudioSec(text) * getRtf(engine);
+      startEta(estTotal, (e, left) => left > 0
+        ? `Berjalan ${fmtDur(e)} • sisa ±${fmtDur(left)}`
+        : `Berjalan ${fmtDur(e)} • sedikit lagi (melebihi perkiraan)...`);
+
+      try {
+        const res = await fetch('/api/synthesize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ engine, text, voice, speed, style: document.getElementById('styleInput').value.trim(), title: document.getElementById('projectTitle').value.trim() })
+        });
+        const data = await res.json();
+
+        if (!data.ok) {
+          throw new Error(data.message || 'Gagal menghasilkan audio');
+        }
+
+        const resBox = document.getElementById('resultBox');
+        resBox.style.display = 'flex';
+        const player = document.getElementById('mainAudioPlayer');
+        player.src = data.audio_url + '?t=' + Date.now();
+        player.play().catch(() => {});
+
+        learnRtf(engine, data.process_time_sec, data.duration_sec);
+        document.getElementById('audioMeta').innerText = `${data.engine.toUpperCase()} • ${data.duration} • ${(data.size_bytes/1024).toFixed(1)} KB (Proses: ${data.process_time_sec}s)`;
+        const btnDl = document.getElementById('btnDownload');
+        btnDl.href = data.audio_url;
+        btnDl.download = data.filename;
+
+        loadHistory();
+      } catch (err) {
+        alert("Terjadi kendala saat generate audio: " + err.message);
+      } finally {
+        stopEta();
+        updateEta();
+        btn.disabled = false;
+        btn.innerHTML = '🔊 Generate Audio Narasi';
+      }
+    }
+
+    async function loadHistory() {
+      const tbody = document.getElementById('historyBody');
+      try {
+        const res = await fetch('/api/history');
+        const data = await res.json();
+        document.getElementById('folderHistory').innerHTML = (data.folders || []).map(f => `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid var(--border); font-size:0.82rem;">
+            <span>📁 <code>${esc(f.folder)}</code> • ${f.count} scene • ${f.time}</span>
+            <a class="btn btn-secondary" style="padding:2px 8px; font-size:0.75rem;" href="/api/zip/${encodeURIComponent(f.folder)}">ZIP</a>
+          </div>`).join('');
+        const files = data.files || [];
+        if (files.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" style="color:var(--text-muted); text-align:center;">Belum ada audio yang diproduksi.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = files.map(f => {
+          let badgeClass = 'badge-pocket';
+          if (f.engine.includes('supertonic')) badgeClass = 'badge-supertonic';
+
+          return `
+            <tr>
+              <td>${f.time}</td>
+              <td><span class="badge ${badgeClass}">${f.engine}</span></td>
+              <td><code>${f.filename}</code></td>
+              <td>${f.voice}</td>
+              <td>${(f.size/1024).toFixed(1)} KB</td>
+              <td>
+                <a class="btn btn-secondary" style="padding:2px 8px; font-size:0.75rem;" href="${f.url}" target="_blank">Putar / Unduh</a>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        tbody.innerHTML = '<tr><td colspan="6" style="color:var(--danger); text-align:center;">Gagal memuat riwayat.</td></tr>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadOptions();
+      checkHealth();
+      setInterval(checkHealth, 5000);
+      loadHistory();
+    });
+  </script>
+</body>
+</html>

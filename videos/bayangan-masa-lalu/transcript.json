@@ -1,0 +1,799 @@
+{
+ "audio": "assets/audio/scene_01.wav",
+ "duration": 81.161,
+ "words": [
+  {
+   "text": "Masa",
+   "start": 0.0,
+   "end": 0.84
+  },
+  {
+   "text": "lalu",
+   "start": 0.84,
+   "end": 1.1
+  },
+  {
+   "text": "yang",
+   "start": 1.1,
+   "end": 1.3
+  },
+  {
+   "text": "belum",
+   "start": 1.3,
+   "end": 1.62
+  },
+  {
+   "text": "dilepaskan",
+   "start": 1.62,
+   "end": 2.5
+  },
+  {
+   "text": "akan",
+   "start": 2.5,
+   "end": 2.9
+  },
+  {
+   "text": "selalu",
+   "start": 2.9,
+   "end": 3.52
+  },
+  {
+   "text": "menjadi",
+   "start": 3.52,
+   "end": 3.96
+  },
+  {
+   "text": "bayangan",
+   "start": 3.96,
+   "end": 4.6
+  },
+  {
+   "text": "dalam",
+   "start": 4.6,
+   "end": 4.94
+  },
+  {
+   "text": "hubungan",
+   "start": 4.94,
+   "end": 5.6
+  },
+  {
+   "text": "yang",
+   "start": 5.6,
+   "end": 5.76
+  },
+  {
+   "text": "baru.",
+   "start": 5.76,
+   "end": 6.14
+  },
+  {
+   "text": "Ia",
+   "start": 7.08,
+   "end": 7.5
+  },
+  {
+   "text": "tidak",
+   "start": 7.5,
+   "end": 7.72
+  },
+  {
+   "text": "terlihat,",
+   "start": 7.72,
+   "end": 8.44
+  },
+  {
+   "text": "tapi",
+   "start": 8.8,
+   "end": 9.04
+  },
+  {
+   "text": "terasa.",
+   "start": 9.04,
+   "end": 9.54
+  },
+  {
+   "text": "Ia",
+   "start": 10.24,
+   "end": 10.6
+  },
+  {
+   "text": "tidak",
+   "start": 10.6,
+   "end": 10.82
+  },
+  {
+   "text": "bicara",
+   "start": 10.82,
+   "end": 11.3
+  },
+  {
+   "text": "tapi",
+   "start": 11.3,
+   "end": 11.68
+  },
+  {
+   "text": "selalu",
+   "start": 11.68,
+   "end": 12.12
+  },
+  {
+   "text": "hadir",
+   "start": 12.12,
+   "end": 12.6
+  },
+  {
+   "text": "di",
+   "start": 12.6,
+   "end": 12.82
+  },
+  {
+   "text": "sela-sela",
+   "start": 12.82,
+   "end": 13.48
+  },
+  {
+   "text": "kehidupan.",
+   "start": 13.48,
+   "end": 14.18
+  },
+  {
+   "text": "Aku",
+   "start": 14.86,
+   "end": 15.18
+  },
+  {
+   "text": "baru",
+   "start": 15.18,
+   "end": 15.44
+  },
+  {
+   "text": "menyadari",
+   "start": 15.44,
+   "end": 16.0
+  },
+  {
+   "text": "bahwa",
+   "start": 16.0,
+   "end": 16.4
+  },
+  {
+   "text": "perasaanku",
+   "start": 16.4,
+   "end": 17.46
+  },
+  {
+   "text": "ada",
+   "start": 17.46,
+   "end": 17.9
+  },
+  {
+   "text": "di",
+   "start": 17.9,
+   "end": 18.18
+  },
+  {
+   "text": "saat",
+   "start": 18.18,
+   "end": 18.46
+  },
+  {
+   "text": "hubungan",
+   "start": 18.46,
+   "end": 19.04
+  },
+  {
+   "text": "kita",
+   "start": 19.04,
+   "end": 19.32
+  },
+  {
+   "text": "sudah",
+   "start": 19.32,
+   "end": 19.66
+  },
+  {
+   "text": "usai.",
+   "start": 19.66,
+   "end": 20.18
+  },
+  {
+   "text": "Saat",
+   "start": 21.04,
+   "end": 21.8
+  },
+  {
+   "text": "pesannya",
+   "start": 21.8,
+   "end": 22.2
+  },
+  {
+   "text": "tidak",
+   "start": 22.2,
+   "end": 22.56
+  },
+  {
+   "text": "lagi",
+   "start": 22.56,
+   "end": 22.9
+  },
+  {
+   "text": "datang,",
+   "start": 22.9,
+   "end": 23.48
+  },
+  {
+   "text": "saat",
+   "start": 23.92,
+   "end": 24.38
+  },
+  {
+   "text": "aku",
+   "start": 24.38,
+   "end": 24.68
+  },
+  {
+   "text": "kehilangan",
+   "start": 24.68,
+   "end": 25.2
+  },
+  {
+   "text": "perhatian",
+   "start": 25.2,
+   "end": 25.82
+  },
+  {
+   "text": "darinya",
+   "start": 25.82,
+   "end": 26.36
+  },
+  {
+   "text": "ketika",
+   "start": 26.36,
+   "end": 27.0
+  },
+  {
+   "text": "aku",
+   "start": 27.0,
+   "end": 27.38
+  },
+  {
+   "text": "terlalu",
+   "start": 27.38,
+   "end": 27.84
+  },
+  {
+   "text": "fokus",
+   "start": 27.84,
+   "end": 28.36
+  },
+  {
+   "text": "pada",
+   "start": 28.36,
+   "end": 29.02
+  },
+  {
+   "text": "bayangan",
+   "start": 29.02,
+   "end": 29.54
+  },
+  {
+   "text": "masa",
+   "start": 29.54,
+   "end": 30.04
+  },
+  {
+   "text": "laluku.",
+   "start": 30.04,
+   "end": 32.14
+  },
+  {
+   "text": "Ia",
+   "start": 32.14,
+   "end": 32.38
+  },
+  {
+   "text": "adalah",
+   "start": 32.38,
+   "end": 32.74
+  },
+  {
+   "text": "sosok",
+   "start": 32.74,
+   "end": 33.16
+  },
+  {
+   "text": "lelaki",
+   "start": 33.16,
+   "end": 33.6
+  },
+  {
+   "text": "yang",
+   "start": 33.6,
+   "end": 33.96
+  },
+  {
+   "text": "datang",
+   "start": 33.96,
+   "end": 34.3
+  },
+  {
+   "text": "menawarkan",
+   "start": 34.3,
+   "end": 34.76
+  },
+  {
+   "text": "cinta",
+   "start": 34.76,
+   "end": 35.36
+  },
+  {
+   "text": "di",
+   "start": 35.36,
+   "end": 35.76
+  },
+  {
+   "text": "saat",
+   "start": 35.76,
+   "end": 36.02
+  },
+  {
+   "text": "aku",
+   "start": 36.02,
+   "end": 36.5
+  },
+  {
+   "text": "sedang",
+   "start": 36.5,
+   "end": 36.94
+  },
+  {
+   "text": "terjerat",
+   "start": 36.94,
+   "end": 37.5
+  },
+  {
+   "text": "oleh",
+   "start": 37.5,
+   "end": 37.7
+  },
+  {
+   "text": "perasaan",
+   "start": 37.7,
+   "end": 38.4
+  },
+  {
+   "text": "kepada",
+   "start": 38.4,
+   "end": 38.58
+  },
+  {
+   "text": "sosok",
+   "start": 38.58,
+   "end": 39.16
+  },
+  {
+   "text": "di",
+   "start": 39.16,
+   "end": 39.38
+  },
+  {
+   "text": "masa",
+   "start": 39.38,
+   "end": 39.56
+  },
+  {
+   "text": "laluku.",
+   "start": 39.56,
+   "end": 40.06
+  },
+  {
+   "text": "Langit",
+   "start": 40.82,
+   "end": 41.18
+  },
+  {
+   "text": "adalah",
+   "start": 41.18,
+   "end": 41.5
+  },
+  {
+   "text": "tipe",
+   "start": 41.5,
+   "end": 41.78
+  },
+  {
+   "text": "lelaki",
+   "start": 41.78,
+   "end": 42.26
+  },
+  {
+   "text": "yang",
+   "start": 42.26,
+   "end": 42.48
+  },
+  {
+   "text": "mencintai",
+   "start": 42.48,
+   "end": 43.02
+  },
+  {
+   "text": "tanpa",
+   "start": 43.02,
+   "end": 43.34
+  },
+  {
+   "text": "banyak",
+   "start": 43.34,
+   "end": 43.64
+  },
+  {
+   "text": "suara.",
+   "start": 43.64,
+   "end": 44.08
+  },
+  {
+   "text": "Ia",
+   "start": 44.94,
+   "end": 45.26
+  },
+  {
+   "text": "tidak",
+   "start": 45.26,
+   "end": 45.4
+  },
+  {
+   "text": "pandai",
+   "start": 45.4,
+   "end": 45.84
+  },
+  {
+   "text": "merangkai",
+   "start": 45.84,
+   "end": 46.28
+  },
+  {
+   "text": "kata",
+   "start": 46.28,
+   "end": 46.5
+  },
+  {
+   "text": "manis,",
+   "start": 46.5,
+   "end": 47.0
+  },
+  {
+   "text": "tapi",
+   "start": 47.4,
+   "end": 47.72
+  },
+  {
+   "text": "selalu",
+   "start": 47.72,
+   "end": 48.14
+  },
+  {
+   "text": "tahu",
+   "start": 48.14,
+   "end": 48.46
+  },
+  {
+   "text": "caranya",
+   "start": 48.46,
+   "end": 49.1
+  },
+  {
+   "text": "bertahan.",
+   "start": 49.1,
+   "end": 49.7
+  },
+  {
+   "text": "Sosok",
+   "start": 50.9,
+   "end": 51.56
+  },
+  {
+   "text": "lelaki",
+   "start": 51.56,
+   "end": 51.9
+  },
+  {
+   "text": "dengan",
+   "start": 51.9,
+   "end": 52.14
+  },
+  {
+   "text": "zodiak",
+   "start": 52.14,
+   "end": 52.56
+  },
+  {
+   "text": "pisces",
+   "start": 52.56,
+   "end": 53.0
+  },
+  {
+   "text": "itu",
+   "start": 53.0,
+   "end": 53.3
+  },
+  {
+   "text": "membuatku",
+   "start": 53.3,
+   "end": 53.94
+  },
+  {
+   "text": "tahu",
+   "start": 53.94,
+   "end": 54.18
+  },
+  {
+   "text": "bagaimana",
+   "start": 54.18,
+   "end": 54.78
+  },
+  {
+   "text": "rasanya",
+   "start": 54.78,
+   "end": 55.28
+  },
+  {
+   "text": "dicintai",
+   "start": 55.28,
+   "end": 56.0
+  },
+  {
+   "text": "tanpa",
+   "start": 56.0,
+   "end": 56.46
+  },
+  {
+   "text": "paksaan.",
+   "start": 56.46,
+   "end": 57.2
+  },
+  {
+   "text": "Ia",
+   "start": 57.2,
+   "end": 58.02
+  },
+  {
+   "text": "tidak",
+   "start": 58.02,
+   "end": 58.18
+  },
+  {
+   "text": "pernah",
+   "start": 58.18,
+   "end": 58.46
+  },
+  {
+   "text": "menuntut",
+   "start": 58.46,
+   "end": 58.92
+  },
+  {
+   "text": "untuk",
+   "start": 58.92,
+   "end": 59.16
+  },
+  {
+   "text": "dipilih,",
+   "start": 59.16,
+   "end": 59.94
+  },
+  {
+   "text": "hanya",
+   "start": 59.94,
+   "end": 60.34
+  },
+  {
+   "text": "hadir",
+   "start": 60.34,
+   "end": 60.8
+  },
+  {
+   "text": "dan",
+   "start": 60.8,
+   "end": 61.04
+  },
+  {
+   "text": "menetap.",
+   "start": 61.04,
+   "end": 61.66
+  },
+  {
+   "text": "Saat",
+   "start": 62.34,
+   "end": 62.6
+  },
+  {
+   "text": "aku",
+   "start": 62.6,
+   "end": 62.8
+  },
+  {
+   "text": "tenggelam",
+   "start": 62.8,
+   "end": 63.22
+  },
+  {
+   "text": "dalam",
+   "start": 63.22,
+   "end": 63.44
+  },
+  {
+   "text": "kenangan",
+   "start": 63.44,
+   "end": 63.92
+  },
+  {
+   "text": "masa",
+   "start": 63.92,
+   "end": 64.24
+  },
+  {
+   "text": "laluku,",
+   "start": 64.24,
+   "end": 64.84
+  },
+  {
+   "text": "ia",
+   "start": 65.4,
+   "end": 65.56
+  },
+  {
+   "text": "hanya",
+   "start": 65.56,
+   "end": 65.74
+  },
+  {
+   "text": "berdiri",
+   "start": 65.74,
+   "end": 66.16
+  },
+  {
+   "text": "di",
+   "start": 66.16,
+   "end": 66.4
+  },
+  {
+   "text": "sampingku,",
+   "start": 66.4,
+   "end": 67.08
+  },
+  {
+   "text": "menunggu",
+   "start": 67.08,
+   "end": 67.92
+  },
+  {
+   "text": "tanpa",
+   "start": 67.92,
+   "end": 68.38
+  },
+  {
+   "text": "banyak",
+   "start": 68.38,
+   "end": 68.7
+  },
+  {
+   "text": "tanya.",
+   "start": 68.7,
+   "end": 69.08
+  },
+  {
+   "text": "Sejak",
+   "start": 70.48,
+   "end": 71.04
+  },
+  {
+   "text": "ia",
+   "start": 71.04,
+   "end": 71.24
+  },
+  {
+   "text": "mengenalku,",
+   "start": 71.24,
+   "end": 71.98
+  },
+  {
+   "text": "ia",
+   "start": 72.32,
+   "end": 72.5
+  },
+  {
+   "text": "tahu",
+   "start": 72.5,
+   "end": 72.76
+  },
+  {
+   "text": "bahwa",
+   "start": 72.76,
+   "end": 73.18
+  },
+  {
+   "text": "aku",
+   "start": 73.18,
+   "end": 73.44
+  },
+  {
+   "text": "tidak",
+   "start": 73.44,
+   "end": 73.7
+  },
+  {
+   "text": "sepenuhnya",
+   "start": 73.7,
+   "end": 74.3
+  },
+  {
+   "text": "utuh.",
+   "start": 74.3,
+   "end": 74.7
+  },
+  {
+   "text": "Ada",
+   "start": 75.08,
+   "end": 75.3
+  },
+  {
+   "text": "bagian",
+   "start": 75.3,
+   "end": 75.68
+  },
+  {
+   "text": "yang",
+   "start": 75.68,
+   "end": 75.88
+  },
+  {
+   "text": "tertinggal",
+   "start": 75.88,
+   "end": 76.44
+  },
+  {
+   "text": "di",
+   "start": 76.44,
+   "end": 76.62
+  },
+  {
+   "text": "masa",
+   "start": 76.62,
+   "end": 76.82
+  },
+  {
+   "text": "lalu.",
+   "start": 76.82,
+   "end": 77.2
+  },
+  {
+   "text": "Namun",
+   "start": 78.32,
+   "end": 79.08
+  },
+  {
+   "text": "langit",
+   "start": 79.08,
+   "end": 79.38
+  },
+  {
+   "text": "tetap",
+   "start": 79.38,
+   "end": 79.7
+  },
+  {
+   "text": "memilih",
+   "start": 79.7,
+   "end": 80.06
+  },
+  {
+   "text": "tinggal.",
+   "start": 80.06,
+   "end": 80.42
+  }
+ ],
+ "matched": 152,
+ "script_words": 158,
+ "heard_words": 159
+}

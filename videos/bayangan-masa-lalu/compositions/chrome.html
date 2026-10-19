@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="id">
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        #chrome { position: absolute; inset: 0; overflow: hidden; }
+        #chrome-label, #chrome-num {
+          position: absolute; top: 200px; font-family: "IBM Plex Mono", monospace; font-weight: 400; font-size: 24px;
+          text-transform: uppercase; color: #A59F98; opacity: 0;
+        }
+        #chrome-label { left: 108px; letter-spacing: 0.3em; }
+        #chrome-num { right: 108px; letter-spacing: 0.2em; }
+        #chrome-progress { position: absolute; left: 108px; top: 1816px; width: 864px; height: 2px; display: block; background: #D08B5B; opacity: 0.85; transform-origin: 0 50%; }
+      </style>
+      <div data-hf-id="hf-b69j" id="chrome" data-composition-id="chrome" data-width="1080" data-height="1920">
+        <div data-hf-id="hf-cmcz" id="chrome-label">Bayangan Masa Lalu</div>
+        <div data-hf-id="hf-jfwo" id="chrome-num">01 / 06</div>
+        <div data-hf-id="hf-n8vx" id="chrome-progress"></div>
+      </div>
+      <script>
+        const tl = gsap.timeline({ paused: true });
+        const DURATION = 81.5;
+        tl.fromTo("#chrome-label", { opacity: 0 }, { opacity: 0.8, duration: 1.4, ease: "sine.inOut" }, 0.8);
+        tl.fromTo("#chrome-num", { opacity: 0 }, { opacity: 0.8, duration: 1.4, ease: "sine.inOut" }, 1.0);
+        tl.fromTo("#chrome-progress", { scaleX: 0 }, { scaleX: 1, duration: DURATION - 0.8, ease: "none" }, 0);
+        tl.to(["#chrome-label", "#chrome-num", "#chrome-progress"], { opacity: 0, duration: 0.8, ease: "sine.in" }, DURATION - 0.8);
+        window.__timelines["chrome"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

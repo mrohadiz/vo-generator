@@ -1,0 +1,41 @@
+# --- RAHASIA: jangan pernah dikomit ---
+.env
+.env.*
+!.env.example
+*~
+*.bak
+
+# --- lingkungan & cache Python ---
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# --- hasil & data pribadi (besar / dapat dibuat ulang) ---
+output/
+audio/
+suara-kloning/
+*.wav
+*.mp3
+
+# --- skrip lama dengan kunci tertanam di kode (pindahkan kunci ke .env sebelum dikomit) ---
+download_broll.py
+
+# --- proyek video (videos/<judul>/): simpan resepnya, bukan aset atau hasilnya ---
+videos/*/assets/*
+!videos/*/assets/fonts/
+videos/*/renders/
+videos/*/snapshots/
+videos/*/boards/
+videos/*/broll/*.mp4
+videos/*/.hyperframes/
+videos/*/.media/
+videos/*/.thumbnails/
+videos/*/.waveform-cache/
+videos/*/node_modules/
+
+# --- editor & sistem ---
+.DS_Store
+*.swp
+.idea/
+.vscode/
