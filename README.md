@@ -1,158 +1,192 @@
 # Studio Narasi TTS Indonesia
 
-Aplikasi web lokal untuk membuat audio narasi bahasa Indonesia dari naskah teks.
-Alurnya: tempel naskah → rapikan/bersihkan → pilih engine & suara → generate audio.
-Mendukung mode **tanpa scene** (satu audio) dan **dengan scene** (satu audio per scene,
-disimpan dalam satu folder bernama sesuai judul).
+Aplikasi web lokal untuk mengubah naskah teks menjadi audio narasi bahasa Indonesia, dari satu paragraf sampai
+dongeng bertokoh banyak. Alurnya: tempel naskah (atau ambil dari URL) → rapikan → atur ekspresi dan jeda → pilih
+mesin dan suara → generate. Hasil disimpan dalam folder bernama sesuai judul.
 
-Berjalan sepenuhnya di CPU lokal. Tidak ada data naskah yang dikirim ke layanan luar
-(model diunduh sekali dari Hugging Face, lalu dipakai dari cache).
+> **Privasi.** Supertonic dan Pocket-TTS berjalan sepenuhnya di komputer ini. Mesin cloud (Gemini TTS, Drama 3) dan
+> semua fitur AI (Analisis Cerita, Petakan Ekspresi, ambil dari URL) **mengirim teks ke layanan luar**. Lihat
+> [Privasi dan keamanan](#privasi-dan-keamanan).
 
-## Engine
+## Fitur
 
-| Engine | Cocok untuk | Kecepatan (CPU) | Catatan |
-|---|---|---|---|
-| **Supertonic** | Naskah panjang, banyak scene, campuran Indonesia–Inggris | ±1× durasi audio | Preset suara M1–M5 dan F1–F5, 44,1 kHz. Kata Inggris dibaca dengan model bahasa Inggris |
-| **Pocket-TTS** | Kloning suara dari sampel di `suara-kloning/` | ±3–4× durasi audio | 24 kHz, hanya Indonesia. Kata Inggris diganti ejaan lisan |
-| **Gemini TTS** (cloud) | Narasi storyteller akurat dan ekspresif, banyak suara | ±0,4× durasi audio (tergantung batas laju) | `gemini-3.8-flash-tts` lewat API Gemini (kunci `GEMINI_KEY`). Teks dikirim ke Google. Batas ±4 panggilan/menit, otomatis diatur dan dicoba ulang |
-| **Gemini TTS via OmniRoute** (cloud) | Gemini yang sama lewat gateway: cepat, tanpa batas beruntun | ±0,3× durasi audio | Hanya suara yang terkendali; gaya bacaan nyaris tidak berpengaruh |
+- **Tiga mode**: tanpa scene (satu audio), dengan scene (satu audio per scene), dan **teater** (banyak tokoh, tiap tokoh
+  punya suara sendiri).
+- **Empat mesin suara**: Supertonic (lokal, cepat), Pocket-TTS (lokal, kloning suara), Gemini TTS (cloud, ekspresif,
+  langsung atau lewat OmniRoute), dan Drama 3 (cloud, per tokoh).
+- **Pembersih teks**: markdown, emoji, singkatan, kata Inggris, penanda `[jeda N]` dan `[emosi X]`, hasil Jina Reader.
+- **Pemetaan AI** untuk scene, tokoh, emosi, dan jeda, dengan cadangan aturan generik bila AI tidak tersedia.
+- **Estimasi waktu proses** yang belajar dari hasil sebelumnya, hot reload saat pengembangan, dan unduh ZIP per folder.
+- **Proyek video** (`videos/`): narasi menjadi video 9:16 dengan B-roll dan caption kata demi kata (HyperFrames).
 
-Angka kecepatan adalah hasil ukur kasar di mesin pengembangan, bukan jaminan.
+## Instalasi
+
+Kebutuhan sistem: Python 3.12, `ffmpeg`, dan `sox` (geser nada suara anak, dekode audio).
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install flask numpy soundfile pocket-tts supertonic gradio_client
+cp .env.example .env        # lalu isi sesuai kebutuhan; .env tidak ikut git
+```
+
+Hanya `flask`, `numpy`, `soundfile`, dan `supertonic` yang wajib untuk memakai Supertonic. `pocket-tts` perlu ±3 GB
+untuk model dan internet pada unduhan pertama. `gradio_client` hanya untuk Drama 3.
 
 ## Menjalankan
 
 ```bash
-# sekali saja
-python3 -m venv .venv
-.venv/bin/pip install flask soundfile numpy pocket-tts supertonic
-
-./run.sh                 # http://127.0.0.1:5000
-PORT=5055 ./run.sh       # port lain
+./run.sh                    # http://127.0.0.1:5000, hot reload aktif
+./run.sh --no-reload        # tanpa hot reload (atau RELOAD=0)
+PORT=5055 ./run.sh          # port lain
 ```
 
-Pada start pertama Supertonic dan Pocket-TTS dimuat di latar belakang (indikator hijau di
-pojok kanan atas). Pocket-TTS membutuhkan ±3 GB untuk model dan internet pada unduhan pertama.
+- **Hot reload**: perubahan `templates/index.html` langsung berlaku (refresh browser); perubahan kode Python memicu
+  restart otomatis (±8 detik, termasuk memuat model). `output/`, `videos/`, `suara-kloning/`, dan `.venv/` tidak
+  memicu restart. Restart **menghentikan sintesis yang sedang berjalan** dan menghapus slot suara Drama 3, jadi
+  pakai `--no-reload` saat men-generate naskah panjang.
+- Supertonic dan Pocket-TTS dimuat di latar belakang saat start (titik hijau di pojok kanan atas).
+- Server mendengarkan di semua antarmuka (`0.0.0.0`).
 
-Untuk Pocket-TTS, **sampel referensi sebaiknya ±10–15 detik** satu penutur, bersih, tanpa musik. Sampel yang lebih panjang
-dipotong otomatis menjadi 12 detik paling "bersuara" (salinan di `suara-kloning/_cache/`, berkas asli tidak diubah; atur lewat
-`POCKET_REF_SECONDS`). Referensi panjang merusak hasil: ±60 detik membuat Pocket-TTS tak pernah berhenti bicara (audio berujung
-ocehan) dan memuat sampel sangat lambat; 20 detik pun masih menurunkan keterbacaan. Diukur dengan Whisper pada teks yang sama,
-`ayu_muntar` memberi WER 28,6% (20 detik) vs 2–8% (12 detik). `POCKET_EOS_THRESHOLD` default -6,0 (anjuran kartu model).
-Tanda kutip dibuang dan jeda antar segmen disesuaikan tanda baca untuk Pocket-TTS. Taruh sampel suara (`.wav`, `.mp3`, `.ogg`, `.flac`) di `suara-kloning/`.
-Nama file menjadi nama suara di pilihan.
+## Konfigurasi `.env`
+
+Hanya variabel di bawah ini yang dibaca aplikasi; variabel lain di `.env` tidak disentuh.
+
+| Variabel | Fungsi |
+|---|---|
+| `OMNIROUTE_KEY`, `OMNIROUTE_ENDPOINT` | Gateway AI kompatibel OpenAI (ejaan `OMNIROUTE_ENPOINT` juga diterima) |
+| `OMNIROUTE_PRIMARY_MODEL` | Model utama semua alur AI. Default `agy/gemini-3.8-flash-tiered` (stabil, mendukung gambar dan alat) |
+| `OMNIROUTE_MODELS` | Cadangan dipisah koma. Default `auto/best-chat,auto/fast,auto/chat` |
+| `GEMINI_KEY` | Cadangan AI langsung dan mesin Gemini TTS |
+| `GEMINI_MODELS` | Model teks Gemini cadangan. Default `gemini-flash-latest,gemini-2.5-flash` |
+| `GEMINI_TTS_MODEL`, `GEMINI_TTS_RPM`, `GEMINI_TTS_TEMPERATURE`, `GEMINI_TTS_ROUTE` | Pengaturan Gemini TTS: model (`gemini-3.8-flash-tts`), batas panggilan/menit (4), temperature (0,8), urutan jalur (`direct,omniroute`) |
+| `HF_TOKEN`, `DRAMA3_URL` | Drama 3 di Space Hugging Face milik sendiri |
+| `POCKET_REF_SECONDS`, `POCKET_EOS_THRESHOLD` | Pocket-TTS: panjang referensi (12) dan eos-threshold (-6,0) |
+| `PIXABAY_API` | Pencarian B-roll untuk proyek video |
+
+Urutan penyedia AI: model utama OmniRoute → cadangan OmniRoute → Gemini langsung → **aturan generik tanpa AI**.
+Hasil AI ditolak (pindah ke berikutnya) bila mengubah atau menghilangkan naskah (kesetiaan kata di bawah ambang).
+
+## Mesin suara
+
+| Mesin | Cocok untuk | Kecepatan (kasar) | Catatan |
+|---|---|---|---|
+| **Supertonic** | Naskah panjang, banyak scene, campuran Indonesia–Inggris | ±0,5–1× durasi audio | Lokal. Suara M1–M5, F1–F5, 44,1 kHz. Tanpa kloning dan tanpa suara anak |
+| **Pocket-TTS** | Meniru suara dari sampel | ±3–4× | Lokal. 24 kHz, hanya Indonesia, rawan mengigau bila sampel atau teks buruk |
+| **Gemini TTS** | Narasi storyteller, ekspresi | ±0,4× | Cloud. `gemini-3.8-flash-tts` lewat API Gemini; gaya bacaan bekerja; batas ±4 panggilan/menit |
+| **Gemini via OmniRoute** | Kecepatan, naskah panjang | ±0,3× | Cloud. Suara sama, tanpa batas beruntun, tetapi gaya bacaan nyaris tidak berpengaruh |
+| **Drama 3** | Tokoh ekspresif, suara anak (mode teater) | ±8–25 detik/panggilan | Cloud (Space ZeroGPU sendiri). Kuota akun gratis kecil |
+
+Kecepatan adalah ukuran kasar di mesin pengembangan, bukan jaminan.
+
+### Supertonic
+Emosi hanya mengatur **tempo baca** (sedih/berbisik lebih pelan, takut/senang lebih cepat) dan jeda; model terbuka ini tidak
+punya kontrol emosi, dan tag ekspresi `<laugh>`/`<sigh>` terbaca sebagai kata (sudah diuji). Kata Inggris dibaca dengan
+model bahasa Inggris. Kloning suara tidak tersedia di bobot terbuka (Voice Builder resmi sudah ditutup).
+
+### Pocket-TTS
+- Taruh sampel (`.wav`, `.mp3`, `.ogg`, `.flac`) di `suara-kloning/`; nama berkas menjadi nama suara.
+- **Sampel ideal ±10–15 detik**, satu penutur, bersih, tanpa musik. Sampel lebih panjang dipotong otomatis menjadi 12
+  detik paling "bersuara" (salinan di `suara-kloning/_cache/`, berkas asli tidak diubah). Referensi panjang merusak hasil:
+  ±60 detik membuat model tak pernah berhenti bicara; 20 detik pun menurunkan keterbacaan (diukur Whisper pada teks
+  yang sama: WER 28,6% pada 20 detik vs 2–8% pada 12 detik).
+- Kata Inggris diganti ejaan lisan (`LOANWORD_RESPELL` di `cleaner.py`, kamus terbatas), tanda kutip dibuang, jeda antar
+  segmen mengikuti tanda baca.
+
+### Gemini TTS
+- Suara favorit **Zubenelgenubi** (default); lainnya Zali, Riko, Sami, Enzo, Achird, Kore, Puck, Charon, Aoede (semua
+  sudah diuji valid). Tambah suara baru dengan menaruh nama persisnya di `VOICES` pada `gemini_tts.py`.
+- Kolom **Gaya bacaan** (Inggris, mis. "Rich, unhurried storytelling narration in Indonesian") dikirim sebagai
+  `speechMetadata.style`; `[emosi X]` menambah arahan gaya otomatis; `[jeda N]` menjadi hening.
+- Batas laju kunci langsung ±4 panggilan/menit ditangani otomatis (naskah dipecah ±500 karakter, percobaan ulang).
+  Bila jalur langsung gagal, dicoba lewat OmniRoute.
+
+### Drama 3
+Per tokoh di mode teater. Suara dibuat dari deskripsi bahasa Inggris (mode *Design*), disimpan lewat `keep_voice`, lalu
+baris berikutnya memakai mode *Clone*. Slot suara hidup di sesi Space dan **hilang bila aplikasi atau Space restart**;
+selesaikan satu cerita dalam satu sesi. Bila gagal, baris otomatis dibacakan Supertonic dengan peringatan.
 
 ## Cara pakai
 
-1. Isi **Judul Narasi**. Judul menjadi nama folder hasil, mis. `Kota Rawa` → `output/kota-rawa/`.
-2. Pilih mode:
-   - **Tanpa Scene**: tempel naskah → *Cek & Bersihkan Teks* → pilih engine/suara → *Generate*.
-   - **Dengan Scene**: tempel semua scene → *Rapikan / Bersihkan Scene* → edit per scene bila perlu → *Generate*.
-3. Hasil mode scene: `output/<judul>/scene_01.wav`, `scene_02.wav`, … plus `info.json`. Ada tombol ZIP.
+1. Isi **Judul Narasi**; judul menjadi nama folder hasil (`Kota Rawa` → `output/kota-rawa/`).
+2. Atau isi **URL** lalu klik *Ambil* untuk mengambil isi artikel/cerita (lewat Jina Reader; navigasi dan iklan dibuang). Hasil
+   Jina yang ditempel langsung ke kotak naskah juga dikenali otomatis.
+3. Pilih mode:
+   - **Tanpa Scene**: *Cek & Bersihkan Teks* → (opsional) *Petakan Ekspresi & Jeda* → mesin dan suara → *Generate*.
+   - **Dengan Scene**: tempel semua scene → *Rapikan / Bersihkan Scene* → edit per scene → *Generate*. Slider "gabung
+     paragraf jadi scene" berlaku bila naskah tanpa pemisah scene.
+   - **Teater**: tempel cerita → *Analisis Cerita* → atur mesin, suara, nada, dan kecepatan tiap tokoh (▶ Coba untuk
+     mendengar) → koreksi baris dan emosi/jeda per baris → *Generate*. **Narator otomatis memakai Gemini** bila
+     `GEMINI_KEY` ada; tokoh anak memakai Drama 3 bila `HF_TOKEN` ada.
+4. Hasil per scene: `output/<judul>/scene_01.wav`, `scene_02.wav`, … plus `info.json` (naskah, tokoh, baris). Ada tombol ZIP.
 
-Estimasi waktu proses tampil di bawah tombol Generate. Rasionya belajar dari hasil generate
-sebelumnya dan disimpan di `localStorage` browser.
+## Format naskah
 
-### Mode Teater (multi-tokoh)
+- **Pemisah scene**: baris `Scene 1` / `Adegan 2` / `Babak 3`, atau `---` / `***` / `___`. Tanpa pemisah, dipecah per baris kosong.
+- **Jeda**: `(Jeda 2 detik)`, `[jeda 1.5]`, atau `(jeda)` (default 1 detik, maks 10). Baris yang hanya `...` juga menjadi jeda.
+- **Emosi**: `[emosi sedih]` (juga `(emosi: takut)`) berlaku sampai penanda berikutnya. Pilihan: netral, senang, sedih,
+  marah, takut, kaget, berbisik, tegas, lembut, licik, menggoda.
+- **Dialog teater**: baris `Nama: ucapan` = tokoh; selain itu Narator.
+- Tulis angka dengan huruf ("seratus dua puluh"), tanda baca teratur, kalimat pendek–sedang.
+- **Kata Inggris** dideteksi dengan heuristik sederhana dan tampil sebagai peringatan; hasilnya bisa meleset. Untuk
+  istilah Inggris yang banyak, pakai Supertonic atau Gemini.
 
-Untuk dongeng/cerita dengan banyak pemeran: tempel cerita (boleh hasil Jina) → **Analisis Cerita** →
-atur suara tiap tokoh → Generate. Hasil per scene ada di `output/<judul>/`.
+## Proyek video
 
-- **Pemetaan**: AI membagi cerita menjadi scene, tokoh, dan baris ucapan (narasi → *Narator*).
-  Urutan penyedia: model OmniRoute, lalu Gemini, lalu **aturan generik** (baris `Nama: ucapan`
-  = tokoh, selain itu Narator) bila AI gagal atau hasilnya mengubah naskah (kesetiaan kata < 85%).
-- **Suara**: tiap tokoh dapat suara Supertonic berbeda (M1–M5, F1–F5) plus geser nada dan kecepatan.
-  Supertonic tidak punya suara anak, jadi tokoh anak = suara wanita + nada naik (sox). Tombol ▶ Coba
-  memutar contoh suara per tokoh. Baris bisa dikoreksi (pembicara dan teks) sebelum generate.
-- **Gemini TTS**: pilih mesin "Gemini TTS" lalu suara. Suara favorit **Zubenelgenubi** (default), pilihan lain Zali, Riko, Sami,
-  Enzo, Achird, Kore, Puck, Charon, Aoede (semua sudah diuji valid). Kolom *Gaya bacaan* (Inggris, mis. "Rich, unhurried
-  storytelling narration in Indonesian") dikirim sebagai `speechMetadata.style`; penanda `[emosi X]` menambah arahan
-  gaya otomatis; `[jeda N]` menjadi hening. Tag `<short pause>` tidak dibaca keras tetapi belum terbukti menambah jeda.
-  Opsional di `.env`: `GEMINI_TTS_MODEL`, `GEMINI_TTS_RPM` (default 4), `GEMINI_TTS_TEMPERATURE` (default 0,8).
-  Jalur: Gemini langsung dulu (gaya bacaan benar-benar bekerja; batas laju diatur otomatis), lalu OmniRoute (`google/gemini-3.8-flash-tts`)
-  sebagai cadangan: cepat dan tanpa batas beruntun, tetapi `instructions` nyaris tidak memengaruhi gaya dan tempo. Urutan bisa diubah
-  dengan `GEMINI_TTS_ROUTE=omniroute,direct` di `.env`. Di mode teater
-  Narator otomatis memakai Gemini bila `GEMINI_KEY` ada; tiap tokoh bisa diganti mesin dan suaranya.
-- **Konfigurasi AI** di `.env` (hanya `OMNIROUTE_*` dan `GEMINI_*` yang dibaca):
-  `OMNIROUTE_KEY`, `OMNIROUTE_ENDPOINT` (ejaan `OMNIROUTE_ENPOINT` juga diterima), opsional
-  `OMNIROUTE_PRIMARY_MODEL` (default **`agy/gemini-3.8-flash-tiered`**, model utama untuk semua alur AI: stabil,
-  mendukung gambar dan pemanggilan alat; ia "berpikir" dulu, jadi `max_tokens` jangan terlalu kecil) dan
-  `OMNIROUTE_MODELS` (cadangan dipisah koma, default `auto/best-chat,auto/fast,auto/chat`),
-  `GEMINI_KEY`, opsional `GEMINI_MODELS` (default `gemini-flash-latest,gemini-2.5-flash`).
-  Teks cerita dikirim ke layanan itu saat Analisis Cerita dengan AI aktif.
-- **Drama 3 (opsional, cloud)**: per tokoh bisa dipilih mesin *Drama 3* alih-alih Supertonic, terutama untuk
-  suara anak/tokoh khusus. Suara dibuat dari deskripsi bahasa Inggris (mode *Design*), disimpan lewat
-  `keep_voice`, lalu baris berikutnya memakai mode *Clone* dengan slot itu. Label emosi dari AI dikirim sebagai
-  arahan akting. Bila Drama 3 gagal (kuota, jaringan), baris itu otomatis dibacakan Supertonic dan muncul
-  peringatan. Tokoh anak otomatis memakai Drama 3 bila `HF_TOKEN` terisi.
-  - Konfigurasi `.env`: `HF_TOKEN` (token fine-grained, hanya baca), opsional `DRAMA3_URL`
-    (default `https://rohadiz-drama-3.hf.space/`). Kuota GPU dihitung dari akun pemilik token.
-  - Slot suara hidup di sesi Space dan hilang bila aplikasi/Space restart. Selesaikan satu cerita dalam satu
-    sesi agar suara tokoh tetap sama.
-  - Teks baris Drama 3 dikirim ke Space di Hugging Face. Tag ekspresi seperti `[sighs]` belum didukung
-    (pembersih teks membuang tanda kurung siku).
-- **Emosi** dari AI dipakai Drama 3 saja; Supertonic tidak punya kontrol emosi.
-
-### Format naskah
-
-- **Pemisah scene**: baris `Scene 1` / `Adegan 2` / `Babak 3`, atau baris `---` / `***` / `___`.
-  Tanpa pemisah, naskah dipecah per baris kosong (satu paragraf = satu scene).
-- **Jeda**: tulis `(Jeda 2 detik)`, `[jeda 1.5]`, atau `(jeda)` (default 1 detik, maks 10).
-  Jeda dibuat sebagai hening, tidak dibaca.
-- **Emosi**: `[emosi sedih]` (juga `(emosi: takut)`) berlaku sampai penanda emosi berikutnya. Pilihan: netral, senang,
-  sedih, marah, takut, kaget, berbisik, tegas, lembut, licik, menggoda. Di Supertonic emosi hanya mengatur tempo baca
-  (sedih/berbisik lebih pelan, takut/senang lebih cepat); di Drama 3 menjadi arahan akting; Pocket-TTS
-  mengabaikannya (jeda tetap dipakai).
-- **Petakan Ekspresi & Jeda**: tombol 🎭 di mode Tanpa Scene dan Dengan Scene menyisipkan `[emosi ...]` dan `[jeda ...]`
-  otomatis (AI, cadangan aturan tanda baca/kata kunci) ke teks yang bisa diedit. Di mode Teater, emosi dan jeda ada
-  per baris (kolom emosi dan jeda).
-- Tulis angka dengan huruf ("seratus dua puluh"), pakai tanda baca teratur, dan kalimat
-  pendek–sedang. Pocket-TTS bisa mengigau pada segmen terlalu pendek atau kalimat berbelit.
-
-### Bahasa Inggris di tengah narasi
-
-Kata Inggris terdeteksi lewat heuristik sederhana (daftar kata fungsi, kamus serapan, pola huruf)
-dan tampil sebagai peringatan. Supertonic membacanya dengan model bahasa Inggris. Pocket-TTS
-memakai ejaan lisan dari `LOANWORD_RESPELL` di `cleaner.py` (kamus terbatas, mudah ditambah).
-Deteksi bisa meleset; untuk naskah dengan banyak istilah Inggris pakai Supertonic.
+`videos/<judul>/` memuat resep video HyperFrames (komposisi, generator frame dan caption, pencarian B-roll Pixabay,
+penyelarasan kata Whisper). Contoh jadi: `videos/bayangan-masa-lalu` (Scene 1, 81,5 detik, 9:16). Status dan rencana
+otomasi penuh: [`docs/PLAN-video.md`](docs/PLAN-video.md). Aset dan hasil render tidak ikut git.
 
 ## Struktur proyek
 
 ```
-app.py               Flask: routes, pemuatan engine, sintesis, ZIP, riwayat
-gemini_tts.py        Mesin Gemini TTS: suara, gaya dari emosi, pembatas laju, cadangan OmniRoute
-drama3.py            Penyedia suara Drama 3 (Space Hugging Face): cast, keep_voice, clone, unduh HLS
-director.py          Mode teater: pemetaan cerita (AI + aturan generik), penetapan suara
-cleaner.py           Pembersihan teks, segmentasi, jeda, scene, deteksi/ejaan kata Inggris
-templates/index.html UI (satu file, JS vanilla)
-run.sh               Peluncur
-suara-kloning/       Sampel suara untuk Pocket-TTS
-output/              Hasil audio (folder per judul)
-download_broll.py    Skrip unduh B-roll lama (lihat docs/PLAN-video.md, akan diganti)
-tts-kloning.py       Servis TTS kloning mandiri (versi awal)
-bench_*.py           Skrip benchmark engine
+app.py               Flask: routes, pemuatan mesin, sintesis, ZIP, riwayat, hot reload
+cleaner.py           Pembersihan teks, segmentasi, penanda jeda/emosi, scene, kata Inggris, ekstraksi artikel
+director.py          Pemetaan cerita dan ekspresi (AI + aturan), penetapan suara; PRIMARY_MODEL
+gemini_tts.py        Gemini TTS: suara, gaya dari emosi, pembatas laju, cadangan OmniRoute
+drama3.py            Drama 3 (Space HF): cast, keep_voice, clone, unduh HLS
+templates/index.html UI satu berkas (JS vanilla)
+run.sh               Peluncur (hot reload)
+videos/              Proyek video HyperFrames
+docs/                Rencana dan catatan
+tts-kloning.py       Servis kloning mandiri (versi awal)
+bench_supertonic.py  Benchmark Supertonic
+suara-kloning/       Sampel suara Pocket-TTS (tidak ikut git)
+output/              Hasil audio (tidak ikut git)
 ```
 
 ## API
 
 | Route | Fungsi |
 |---|---|
-| `GET /api/status` | Status kesiapan tiap engine (`ready`, `loading`, `error`) |
-| `GET /api/options` | Daftar engine dan suara |
+| `GET /api/status` | Kesiapan tiap mesin |
+| `GET /api/options` | Daftar mesin dan suara |
 | `GET /api/sample/<voice_id>` | Putar sampel suara Pocket-TTS |
 | `POST /api/clean` | `{text}` → teks bersih, statistik, segmen, peringatan |
-| `POST /api/clean_scenes` | `{text}` → daftar scene yang sudah dibersihkan |
-| `POST /api/annotate` | `{texts[], use_ai}` → teks berpenanda `[emosi]`/`[jeda]` per teks |
+| `POST /api/fetch_url` | `{url}` → judul dan isi artikel (lewat Jina Reader) |
+| `POST /api/clean_scenes` | `{text, group_words?}` → daftar scene bersih |
+| `POST /api/annotate` | `{texts[], use_ai}` → teks berpenanda `[emosi]`/`[jeda]` |
 | `POST /api/direct` | `{text, use_ai}` → scene, tokoh, baris, usulan suara |
-| `POST /api/synthesize` | `{engine, text, voice, speed, title, scene?}` → WAV. Dengan `scene` masuk ke `output/<slug>/scene_NN.wav` |
+| `POST /api/synthesize` | `{engine, text, voice, speed, style?, title, scene?}` atau `{lines[], title, scene}` → WAV |
 | `GET /api/zip/<folder>` | ZIP seluruh scene dalam folder |
 | `GET /api/history` | Audio terbaru dan folder scene |
 | `GET /output/<path>` | Berkas hasil |
 
+## Privasi dan keamanan
+
+- **Dikirim ke luar**: teks naskah ke Google (Gemini TTS, juga lewat OmniRoute), ke gateway/penyedia model AI (Analisis
+  Cerita, Petakan Ekspresi), ke Space Hugging Face (Drama 3), dan alamat halaman ke r.jina.ai (ambil dari URL).
+  Untuk naskah sensitif, pakai Supertonic atau Pocket-TTS dan matikan "Pakai AI".
+- **Rahasia** hanya di `.env` (tidak dilacak git; contoh di `.env.example`). Jangan menempel token di chat atau kode.
+- Server terbuka di semua antarmuka dan **tanpa autentikasi**: siapa pun di jaringan yang sama bisa memakai fitur AI
+  (kuota Anda). Jalankan di jaringan tepercaya.
+- Kunci Gemini langsung dan akun gratis Hugging Face punya batas laju/kuota; mesin otomatis jatuh ke cadangan.
+
 ## Pemecahan masalah
 
-- **"Gagal memuat Pocket-TTS"**: lihat teks lengkap setelah pesan itu di terminal `run.sh` atau di
-  `/api/status` (field `error`). Status engine dicatat sekali saat start, jadi restart server
-  setelah memperbaiki penyebabnya.
-- **Pocket-TTS suara ngaco/berulang**: biasanya segmen terlalu pendek atau kalimat terlalu panjang.
-  Tambah tanda baca atau pecah kalimat.
-- **Sintesis sangat lama**: normal untuk Pocket-TTS di CPU. Pakai Supertonic untuk naskah panjang.
+- **"Gagal memuat Pocket-TTS"**: lihat pesan lengkapnya di terminal `run.sh` atau `/api/status` (field `error`). Status
+  dicatat saat start; restart setelah perbaikan.
+- **Pocket-TTS mengigau atau audio rusak**: periksa panjang sampel (≤ 15 detik), atau kalimat terlalu panjang/pendek.
+- **Gemini 429 / lambat**: batas ±4 panggilan/menit pada kunci langsung; otomatis diatur dan dicoba ulang, atau pilih
+  "Gemini via OmniRoute".
+- **Drama 3 gagal**: kuota ZeroGPU akun habis; baris jatuh ke Supertonic dengan peringatan ⚠️.
+- **Sintesis terputus di tengah**: hot reload me-restart server saat kode berubah; gunakan `./run.sh --no-reload`.

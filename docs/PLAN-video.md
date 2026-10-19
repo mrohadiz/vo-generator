@@ -1,134 +1,62 @@
-# Rencana: Dari Audio Scene ke Video Otomatis
+# Video dari Audio Scene: status dan rencana
 
-Status: **perencanaan** (belum ada kode). Dokumen ini adalah titik awal tahap video; perbarui
-seiring keputusan berubah.
+Status: **Scene 1 "Bayangan Masa Lalu" sudah dibangun dan dirender dengan HyperFrames**
+(`videos/bayangan-masa-lalu/`). Otomasi untuk scene lain (`make_video`) belum ada.
 
-## Tujuan
+## Yang sudah jadi (Scene 1)
 
-Dari naskah yang sudah menjadi `output/<judul>/scene_NN.wav`, hasilkan video vertikal
-**9:16 (1080×1920)** berisi B-roll yang relevan, caption yang sinkron dengan suara, judul scene,
-dan transisi, dengan intervensi manual seminimal mungkin. Tetap ada langkah pratinjau supaya
-klip yang meleset bisa diganti sebelum render.
+Video 1080×1920, 81,5 detik, narasi `output/bayangan-masa-lalu/scene_01.wav`, tanpa musik, dengan B-roll Pixabay dan
+caption kata demi kata. Dirender dalam 22 menit 27 detik di mesin ini (CPU, tangkap frame dengan percepatan GPU); berkas
+161,5 MB (H.264 + AAC). `hyperframes check` lulus pada 10 titik waktu (sampel bawaan melewati batas waktu karena footage 4K).
 
-## Keputusan yang sudah diambil
+Alur yang terbukti, semuanya skrip di `videos/<judul>/tools/`:
 
-| Topik | Keputusan |
-|---|---|
-| Format | 9:16 vertikal (Shorts/Reels/TikTok) |
-| Perakit video | Remotion (React), Lottie untuk aksen kecil (opsional) |
-| Sumber B-roll | Pixabay (API resmi) dulu. Pexels menyusul bila pendaftaran API dibuka |
-| Pemilihan klip | Otomatis + pratinjau kandidat untuk diganti |
-| Unit kerja | Satu komposisi per scene, lalu digabung dengan ffmpeg |
-| Folder proyek | `output/<slug-judul>/`, sama dengan folder audio |
+| Tahap | Skrip | Catatan |
+|---|---|---|
+| Waktu per kata | `transcribe_align.py` | faster-whisper CPU (model small) diselaraskan ke naskah asli; 152 dari 158 kata cocok langsung, sisanya diinterpolasi |
+| Cari B-roll | `pixabay_search.py` | API resmi Pixabay, kunci `PIXABAY_API` di `.env`; kandidat per denyut cerita |
+| Pilih klip | `contact_sheet.py` | lembar kontak 9:16 untuk memilih dengan mata (belum otomatis) |
+| Susun frame | `build_frames.py` | menulis komposisi per frame dan memasang perlakuan media lewat `hyperframes media-treatment` |
+| Caption | `build_captions.py` | karaoke kata demi kata (rule `asr-keyword-glow`), grup seimbang per kalimat |
 
-## Alur
+Spesifikasi desain di `frame.md` (gelap sinematik, Fraunces + IBM Plex Mono, satu aksen hangat), rencana per frame di
+`STORYBOARD.md`, brief dan keputusan di `BRIEF.md`.
 
-```
-naskah per scene ──► scene_NN.wav            (sudah ada)
-                        │
-        1. timing       │  faster-whisper → kata + waktu mulai/selesai
-        2. kata kunci   │  Gemini → 2–4 query visual (Inggris) per scene
-        3. B-roll       │  Pixabay → kandidat, unduh, cache
-        4. susun        │  scene.json: klip, caption, durasi
-        5. render       │  Remotion per scene → ffmpeg gabung → mp4
-                        ▼
-              output/<judul>/video/scene_NN.mp4 + final.mp4
-```
+## Keputusan
 
-## Struktur berkas yang direncanakan
+| Topik | Keputusan | Alasan |
+|---|---|---|
+| Perakit video | **HyperFrames** (bukan Remotion) | Ada alur siap untuk narasi, caption, dan audio; transkripsi Remotion di skill-nya butuh GPU, mesin ini tidak punya |
+| Format | 9:16 (Shorts/TikTok) | Pilihan pengguna |
+| Sumber B-roll | Pixabay (API resmi) | Pendaftaran API Pexels sedang ditutup; skrip lama `download_broll.py` memakai endpoint internal Pexels, tidak dipakai |
+| Perlakuan warna | `media-treatment` resmi, bukan filter CSS | Aturan skill; footage terang digelapkan keras agar caption terbaca |
+| Unit kerja | Satu proyek per scene, lalu digabung ffmpeg | Bisa dilanjutkan atau diulang per scene |
+| Model AI | `agy/gemini-3.8-flash-tiered` (utama, mendukung gambar dan alat) | Stabil pada uji; model lain cadangan |
 
-```
-output/<judul>/
-  scene_NN.wav
-  info.json                  judul, engine, suara, naskah tiap scene (sudah ada)
-  timing/scene_NN.json       kata + waktu (tahap 1)
-  broll/
-    candidates.json          kandidat per scene dari pencarian (tahap 3)
-    selected.json            klip terpilih per scene
-    *.mp4                    klip terunduh (+ kredit pembuat)
-  video/scene_NN.mp4, final.mp4
-broll.py                     pencarian & unduh B-roll (provider modular)
-video/                       proyek Remotion
-```
+## Rencana: `make_video <folder>`
 
-## Tahapan
+Satu perintah dari `output/<judul>/` ke video per scene, memakai skrip di atas ditambah tiga titik AI, masing-masing
+dengan cadangan non-AI:
 
-### Tahap 1. Timing & caption
-- Transkripsi tiap `scene_NN.wav` dengan faster-whisper (model *small* sudah ada di cache
-  Hugging Face; paket Python belum terpasang di `.venv`).
-- Keluaran: `timing/scene_NN.json` berisi kata, `start`, `end`.
-- Karena teks sumber sudah diketahui, cocokkan hasil transkripsi ke naskah asli supaya
-  caption memakai ejaan naskah, bukan hasil tebakan model.
-- **Selesai bila**: caption menampilkan kata yang sedang diucapkan dengan selisih waktu
-  yang tidak terasa.
+1. **Kata kunci per denyut** (AI; cadangan: kata kunci dari kalimat).
+2. **Memilih klip dari thumbnail** (AI visi; cadangan: skor durasi, vertikal, resolusi, kegelapan).
+3. **Menilai snapshot** keterbacaan caption (AI visi sebagai tanda bahaya; **hakim terakhirnya tetap `hyperframes check`**,
+   karena penilaian AI lebih ketat dan tidak selalu sejalan dengan angka kontras).
 
-### Tahap 2. Kata kunci B-roll
-- Gemini (kunci `GEMINI_API_KEY` sudah ada di environment) membaca tiap scene dan mengusulkan
-  2–4 query bahasa Inggris yang konkret (objek/suasana yang bisa difilmkan, bukan konsep abstrak).
-- Keluaran disimpan ke `info.json` agar bisa diedit manual.
-- **Selesai bila**: tiap scene punya query yang masuk akal; query bisa diedit di UI.
+Eksposur footage dihitung dari pengukuran terang area caption, bukan disetel manual. Hanya klip 1080p atau vertikal yang
+dipilih supaya `check` dan render tidak macet pada 4K.
 
-### Tahap 3. Pencarian & pemilihan B-roll
-- `broll.py` dengan antarmuka provider: `search(query) -> [Clip]` (`id`, `url`, `width`, `height`,
-  `duration`, `author`, `page`). Provider pertama: Pixabay. Provider Pexels ditambahkan nanti
-  tanpa mengubah kode lain.
-- Pixabay tidak punya filter orientasi untuk video, jadi filter berdasarkan ukuran. Klip landscape
-  di-*crop* tengah oleh Remotion.
-- Hanya unduh klip yang dipilih. Pratinjau memakai tautan pratinjau kecil dari API.
-- Klip yang ditaruh manual di `broll/` ikut muncul sebagai kandidat.
-- Simpan kredit pembuat di `broll/*.json` (pengganti `manifest.json` skrip lama).
-- UI: tiap scene menampilkan 3–4 kandidat; klik untuk mengganti, simpan ke `selected.json`.
+Perkiraan render: ±19 detik per detik video di mesin ini, jadi narasi 8,5 menit ≈ 2,5–3 jam.
 
-### Tahap 4. Render Remotion
-- Proyek di `video/`. Komposisi `Scene` menerima props dari `scene.json`.
-- Isi: B-roll berganti mengikuti kalimat (≈ 3–6 detik per klip), caption karaoke, judul scene,
-  transisi sederhana antar klip dan antar scene.
-- Render berjalan di latar (proses terpisah) karena lama; UI membaca status dari berkas atau endpoint.
-- Gabungkan semua scene dengan ffmpeg menjadi `final.mp4`.
-- Lottie hanya setelah dasar stabil (lower-third, ikon penanda).
-
-### Tahap 5. Integrasi UI
-- Tombol **Buat Video** pada hasil scene, panel pratinjau B-roll, bilah progres render,
-  pemutar `final.mp4`.
-- Endpoint baru (usulan): `POST /api/video/prepare`, `GET /api/video/candidates`,
-  `POST /api/video/select`, `POST /api/video/render`, `GET /api/video/status`.
-
-## Risiko & catatan
+## Risiko dan catatan
 
 | Risiko | Penanganan |
 |---|---|
-| Stok video tidak cocok dengan naskah spesifik (tokoh, tempat tertentu) | Pratinjau + ganti manual; cadangan klip lokal; query yang menekankan suasana |
-| Koleksi Pixabay lebih terbatas | Provider modular, tambah Pexels/lainnya kemudian |
-| Render Remotion lambat di CPU | Render per scene di latar; satu scene gagal tidak menggagalkan lainnya; resolusi pratinjau lebih rendah |
-| Crop landscape ke 9:16 membuang banyak area | Preferensi klip portrait; titik fokus tengah |
-| Waktu caption meleset | Cocokkan ke naskah asli; opsi geser offset global |
-| Kunci API bocor | Simpan di `.env` (masuk `.gitignore`), jangan di kode |
+| Stok video tak cocok dengan naskah spesifik | Pratinjau kandidat dan ganti manual; query menekankan suasana |
+| Lisensi Pixabay **belum diverifikasi** dari halaman resmi (diblokir Cloudflare) | Baca ketentuannya sebelum menerbitkan; kredit di `broll/CREDITS.md` |
+| Waktu kata yang diinterpolasi bisa meleset | Periksa saat memutar; cocokkan ke naskah asli |
+| `check` sampel bawaan melewati batas waktu | Jalankan per kelompok `--at` |
+| Penilaian visual AI berbeda dari angka kontras | AI hanya menandai; angka yang memutuskan |
+| Render lama | Render per scene di latar, bisa dilanjutkan |
 
-## Catatan soal `download_broll.py`
-
-Skrip lama **tidak dipakai** untuk pipeline ini:
-- Memanggil endpoint internal pexels.com dengan kunci front-end dan menyamar sebagai browser,
-  bukan API resmi. Rapuh dan kemungkinan melanggar ketentuan layanan.
-- Daftar klipnya tertulis tangan untuk satu naskah, dan menulis ke `remotion-video/public/broll`
-  yang tidak ada di proyek ini.
-
-Yang dipertahankan sebagai ide: pilih file 720×1280 lebih dulu, minimal durasi 3 detik, buang file
-di bawah 200 KB, dan catat kredit pembuat.
-
-## Prasyarat & status
-
-| Item | Status |
-|---|---|
-| Node 24, npm, ffmpeg | Terpasang |
-| `GEMINI_API_KEY` | Ada di environment |
-| faster-whisper (model *small*) | Model di cache, paket Python belum dipasang |
-| Pixabay API key | **Belum ada**, simpan di `.env` sebagai `PIXABAY_API_KEY` |
-| Pexels API | Pendaftaran sedang ditutup |
-| Proyek Remotion | Belum dibuat |
-
-## Urutan kerja yang disarankan
-
-1. Tahap 1 + 2 (tidak butuh key baru), validasi hasil dengan satu folder scene nyata.
-2. Tahap 3 begitu key Pixabay tersedia.
-3. Tahap 4 untuk satu scene dulu, lalu semua scene + penggabungan.
-4. Tahap 5 (UI), terakhir.
+Aset (footage, render) tidak ikut git; hanya resep (skrip, komposisi, brief, storyboard, transkrip).
