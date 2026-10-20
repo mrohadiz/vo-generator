@@ -11,6 +11,12 @@ __pycache__/
 *.pyc
 .pytest_cache/
 
+# --- frontend React (FieldNote UI) ---
+frontend/node_modules/
+frontend/vendor/*/node_modules/
+frontend/vendor/*/dist/
+static/app/
+
 # --- hasil & data pribadi (besar / dapat dibuat ulang) ---
 output/
 audio/
@@ -39,3 +45,7 @@ videos/*/node_modules/
 *.swp
 .idea/
 .vscode/
+
+# --- alat agen lokal ---
+.agents/
+skills-lock.json

@@ -1,0 +1,439 @@
+/*
+ * FieldNote UI — layout and navigation styles.
+ * Requires tokens: import '@fieldnote-ui/theme/styles.css' first.
+ */
+
+/* ── Intent colours for navigation glyphs (standalone, no ui dependency) ── */
+[data-intent='observation'] {
+  --fn-i-accent: var(--fn-intent-observation-accent);
+  --fn-i-text: var(--fn-intent-observation-text);
+  --fn-i-tint: var(--fn-intent-observation-tint);
+  --fn-i-border: var(--fn-intent-observation-border);
+}
+[data-intent='evidence'] {
+  --fn-i-accent: var(--fn-intent-evidence-accent);
+  --fn-i-text: var(--fn-intent-evidence-text);
+  --fn-i-tint: var(--fn-intent-evidence-tint);
+  --fn-i-border: var(--fn-intent-evidence-border);
+}
+[data-intent='insight'] {
+  --fn-i-accent: var(--fn-intent-insight-accent);
+  --fn-i-text: var(--fn-intent-insight-text);
+  --fn-i-tint: var(--fn-intent-insight-tint);
+  --fn-i-border: var(--fn-intent-insight-border);
+}
+[data-intent='decision'] {
+  --fn-i-accent: var(--fn-intent-decision-accent);
+  --fn-i-text: var(--fn-intent-decision-text);
+  --fn-i-tint: var(--fn-intent-decision-tint);
+  --fn-i-border: var(--fn-intent-decision-border);
+}
+[data-intent='learning'] {
+  --fn-i-accent: var(--fn-intent-learning-accent);
+  --fn-i-text: var(--fn-intent-learning-text);
+  --fn-i-tint: var(--fn-intent-learning-tint);
+  --fn-i-border: var(--fn-intent-learning-border);
+}
+
+/* ── Shell grid ───────────────────────────────────────────────────────── */
+
+.fn-layout {
+  --fn-layout-nav-width: 16rem;
+  --fn-layout-aside-width: 20rem;
+  --fn-layout-nav-col: 0px;
+  --fn-layout-aside-col: 0px;
+  display: grid;
+  grid-template-columns: var(--fn-layout-nav-col) minmax(0, 1fr) var(--fn-layout-aside-col);
+  min-height: 100vh;
+  background: var(--fn-color-paper);
+  color: var(--fn-color-text-primary);
+}
+.fn-layout:has(> .fn-layout__nav) {
+  --fn-layout-nav-col: var(--fn-layout-nav-width);
+}
+.fn-layout:has(> .fn-layout__aside) {
+  --fn-layout-aside-col: var(--fn-layout-aside-width);
+}
+.fn-layout__nav {
+  grid-column: 1;
+  position: sticky;
+  top: 0;
+  align-self: start;
+  max-height: 100vh;
+  overflow-y: auto;
+  border-inline-end: 1px solid var(--fn-color-border);
+  background: var(--fn-color-surface);
+}
+.fn-layout__main {
+  grid-column: 2;
+  min-width: 0;
+  padding: var(--fn-space-8) var(--fn-space-6) var(--fn-space-12);
+}
+.fn-layout__main:focus:not(:focus-visible) {
+  outline: none;
+}
+.fn-layout__aside {
+  grid-column: 3;
+  position: sticky;
+  top: 0;
+  align-self: start;
+  max-height: 100vh;
+  overflow-y: auto;
+  padding: var(--fn-space-8) var(--fn-space-5);
+  border-inline-start: 1px solid var(--fn-color-border);
+  background: var(--fn-color-surface);
+  display: flex;
+  flex-direction: column;
+  gap: var(--fn-space-5);
+}
+.fn-layout__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fn-space-6);
+  margin-top: var(--fn-space-6);
+  min-width: 0;
+}
+
+/* Page header */
+.fn-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--fn-space-4);
+  padding-bottom: var(--fn-space-5);
+  border-bottom: 1px solid var(--fn-color-border);
+}
+.fn-page-header__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fn-space-2);
+  min-width: 0;
+}
+.fn-page-header__title {
+  margin: 0;
+  font-size: var(--fn-text-2xl);
+  line-height: var(--fn-leading-2xl);
+  font-family: var(--fn-font-display);
+  text-wrap: balance;
+}
+.fn-page-header__description {
+  max-width: 60ch;
+  color: var(--fn-color-text-secondary);
+  font-size: var(--fn-text-md);
+}
+.fn-page-header__description > p {
+  margin: 0;
+}
+.fn-page-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fn-space-2);
+}
+.fn-kicker {
+  margin: 0;
+}
+
+/* ── Notebook ─────────────────────────────────────────────────────────── */
+.fn-layout--notebook .fn-layout__content {
+  max-width: 48rem;
+}
+.fn-layout--notebook .fn-layout__main {
+  padding-inline: var(--fn-space-8);
+}
+
+/* ── Observatory ──────────────────────────────────────────────────────── */
+.fn-layout__readings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--fn-space-3);
+  margin-top: var(--fn-space-6);
+}
+.fn-layout__readings > * {
+  min-width: 0;
+}
+
+/* ── Assistant ────────────────────────────────────────────────────────── */
+.fn-layout--assistant .fn-layout__main {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0;
+  min-height: 100vh;
+}
+.fn-layout--assistant .fn-layout__conversation-header {
+  padding-bottom: var(--fn-space-4);
+  border-bottom: 1px solid var(--fn-color-border);
+}
+.fn-layout__main--conversation .fn-layout__conversation-header h1 {
+  font-size: var(--fn-text-xl);
+  line-height: var(--fn-leading-xl);
+}
+.fn-layout__conversation {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--fn-space-4);
+  max-width: 46rem;
+  width: 100%;
+  padding: var(--fn-space-6) 0;
+}
+.fn-layout__composer {
+  position: sticky;
+  bottom: 0;
+  max-width: 46rem;
+  width: 100%;
+  padding: var(--fn-space-4) 0 var(--fn-space-6);
+  background: linear-gradient(to bottom, transparent, var(--fn-color-paper) 1.5rem);
+}
+
+/* ── Workspace ────────────────────────────────────────────────────────── */
+.fn-layout--workspace {
+  --fn-layout-nav-width: 15rem;
+}
+.fn-layout__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fn-space-2);
+  margin-bottom: var(--fn-space-5);
+  padding-bottom: var(--fn-space-4);
+  border-bottom: 1px solid var(--fn-color-border);
+}
+.fn-layout--workspace .fn-layout__main > h1 {
+  margin: 0 0 var(--fn-space-4);
+  font-size: var(--fn-text-2xl);
+  font-family: var(--fn-font-display);
+}
+
+/* ── Research ─────────────────────────────────────────────────────────── */
+.fn-layout--research .fn-layout__content {
+  max-width: 52rem;
+}
+.fn-layout--research .fn-page-header__description {
+  font-family: var(--fn-font-display);
+  font-size: var(--fn-text-lg);
+  font-style: italic;
+}
+
+/* ── Garden ───────────────────────────────────────────────────────────── */
+.fn-garden-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: var(--fn-space-4);
+  align-items: stretch;
+}
+
+/* ── Navigation ───────────────────────────────────────────────────────── */
+.fn-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fn-space-6);
+  padding: var(--fn-space-6) var(--fn-space-4);
+}
+.fn-nav__title {
+  margin: 0;
+  font-family: var(--fn-font-display);
+  font-size: var(--fn-text-lg);
+  font-weight: var(--fn-weight-semibold);
+  color: var(--fn-color-text-primary);
+}
+.fn-nav__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fn-space-1-5);
+}
+.fn-nav__heading {
+  display: flex;
+  align-items: center;
+  gap: var(--fn-space-2);
+  margin: 0;
+  font-family: var(--fn-font-body);
+  font-size: var(--fn-text-xs);
+  font-weight: var(--fn-weight-semibold);
+  letter-spacing: var(--fn-tracking-wide);
+  text-transform: uppercase;
+  color: var(--fn-color-text-secondary);
+}
+.fn-nav__section[data-stage='observe'] .fn-nav__heading svg {
+  color: var(--fn-intent-observation-text);
+}
+.fn-nav__section[data-stage='interpret'] .fn-nav__heading svg {
+  color: var(--fn-intent-insight-text);
+}
+.fn-nav__section[data-stage='decide'] .fn-nav__heading svg {
+  color: var(--fn-intent-decision-text);
+}
+.fn-nav__section[data-stage='learn'] .fn-nav__heading svg {
+  color: var(--fn-intent-learning-text);
+}
+.fn-nav__description {
+  margin: 0;
+  font-size: var(--fn-text-xs);
+  color: var(--fn-color-text-tertiary);
+}
+.fn-nav__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.fn-nav__link {
+  display: flex;
+  align-items: center;
+  gap: var(--fn-space-2);
+  min-height: 2.25rem;
+  padding: var(--fn-space-1) 10px;
+  border-radius: var(--fn-radius-sm);
+  color: var(--fn-color-text-primary);
+  text-decoration: none;
+  font-size: var(--fn-text-sm);
+}
+.fn-nav__link:hover {
+  background: var(--fn-color-surface-sunken);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.fn-nav__link[aria-current='page'] {
+  background: color-mix(in srgb, var(--fn-color-primary) 12%, var(--fn-color-surface));
+  box-shadow: inset 3px 0 0 var(--fn-color-primary);
+  font-weight: var(--fn-weight-semibold);
+}
+.fn-nav__link-label {
+  flex: 1;
+  min-width: 0;
+}
+.fn-nav__count {
+  font-family: var(--fn-font-mono);
+  font-size: var(--fn-text-xs);
+  color: var(--fn-color-text-tertiary);
+}
+.fn-nav__chevron {
+  color: var(--fn-color-primary);
+}
+
+.fn-loop__list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--fn-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.fn-loop__item {
+  position: relative;
+  display: flex;
+  min-width: 0;
+}
+.fn-loop__link {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fn-space-2);
+  flex: 1;
+  padding: var(--fn-space-4);
+  background: var(--fn-color-surface);
+  border: 1px solid var(--fn-color-border);
+  border-block-start: 3px solid var(--fn-i-accent);
+  border-radius: var(--fn-radius-md);
+  color: var(--fn-color-text-primary);
+  text-decoration: none;
+}
+.fn-loop__link svg {
+  color: var(--fn-i-text);
+}
+.fn-loop__link[aria-current='step'] {
+  box-shadow: 0 0 0 2px var(--fn-color-focus);
+}
+.fn-loop__label {
+  font-family: var(--fn-font-display);
+  font-size: var(--fn-text-lg);
+  font-weight: var(--fn-weight-semibold);
+}
+.fn-loop__desc {
+  font-size: var(--fn-text-sm);
+  color: var(--fn-color-text-secondary);
+}
+a.fn-loop__link:hover {
+  background: var(--fn-i-tint);
+}
+
+.fn-breadcrumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fn-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fn-text-sm);
+  color: var(--fn-color-text-secondary);
+}
+.fn-breadcrumbs li {
+  display: flex;
+  align-items: center;
+  gap: var(--fn-space-2);
+}
+.fn-breadcrumbs [aria-current='page'] {
+  color: var(--fn-color-text-primary);
+  font-weight: var(--fn-weight-medium);
+}
+.fn-breadcrumbs__sep {
+  color: var(--fn-color-text-tertiary);
+}
+
+/* ── Skip link (layouts render one; base style lives in the theme) ───── */
+.fn-skip-link {
+  position: absolute;
+}
+
+/* ── Responsive collapse ─────────────────────────────────────────────── */
+@media (max-width: 64rem) {
+  .fn-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .fn-layout__nav,
+  .fn-layout__aside {
+    grid-column: 1;
+    position: static;
+    max-height: none;
+    overflow: visible;
+    border: 0;
+    border-block-end: 1px solid var(--fn-color-border);
+  }
+  .fn-layout__aside {
+    border-block-start: 1px solid var(--fn-color-border);
+    border-block-end: 0;
+  }
+  .fn-layout__main {
+    grid-column: 1;
+    padding: var(--fn-space-6) var(--fn-space-4) var(--fn-space-10);
+  }
+  .fn-layout--notebook .fn-layout__main {
+    padding-inline: var(--fn-space-4);
+  }
+  .fn-loop__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 40rem) {
+  .fn-loop__list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media print {
+  .fn-layout__nav,
+  .fn-layout__aside,
+  .fn-layout__composer,
+  .fn-skip-link {
+    display: none;
+  }
+  .fn-layout {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+  }
+  .fn-layout__main {
+    padding: 0;
+  }
+}

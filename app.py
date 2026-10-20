@@ -12,6 +12,9 @@ import sys
 import time
 import datetime
 import threading
+import queue
+import uuid
+from copy import deepcopy
 import numpy as np
 import soundfile as sf
 from flask import Flask, render_template, request, jsonify, send_from_directory, send_file
@@ -24,9 +27,10 @@ import gemini_tts
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SUARA_DIR = os.path.join(BASE_DIR, "suara-kloning")
 OUTPUT_DIR = os.path.join(BASE_DIR, "output")
+APP_DIR = os.path.join(BASE_DIR, "static", "app")   # hasil build React (frontend/)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "templates"))
+app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "templates"), static_folder=None)
 
 # --- Engine 1: Pocket-TTS ---
 POCKET_CONFIG = (
@@ -56,6 +60,18 @@ SUPERTONIC_VOICES = [
 
 # Global lock untuk menjaga eksekusi sintesis aman di CPU
 lock_sintesis = threading.Lock()
+
+# --- Antrian pekerjaan (in-memory, satu pekerja) ---------------------------
+# Job disimpan di RAM: restart server menghapus antrian. Karena itu mode antrian
+# dijalankan dengan RELOAD=0 (lihat run.sh) supaya hot reload tidak menghapus job.
+JOB_QUEUE: "queue.Queue[dict]" = queue.Queue()
+JOB_STORE: dict = {}
+job_store_lock = threading.Lock()
+JOB_HISTORY_LIMIT = int(os.environ.get("JOB_HISTORY_LIMIT", "200"))
+
+
+def _now() -> float:
+    return time.time()
 
 # Status kesiapan engine
 engine_status = {
@@ -140,7 +156,30 @@ def get_pocket_voices():
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    """Sajikan aplikasi React (static/app). Bila belum dibangun, jelaskan cara build."""
+    if not os.path.isfile(os.path.join(APP_DIR, "index.html")):
+        return (
+            "<h1>Frontend belum dibangun</h1>"
+            "<p>Jalankan <code>cd frontend &amp;&amp; pnpm install &amp;&amp; pnpm run build:vendor &amp;&amp; pnpm run build</code>,"
+            " atau <code>./run.sh</code> yang membangunnya otomatis.</p>",
+            503,
+            {"Content-Type": "text/html; charset=utf-8"},
+        )
+    return send_from_directory(APP_DIR, "index.html")
+
+
+@app.route("/assets/<path:filename>")
+def serve_assets(filename):
+    """Berkas hasil build Vite (JS, CSS, font)."""
+    return send_from_directory(os.path.join(APP_DIR, "assets"), filename)
+
+
+@app.route("/favicon.ico")
+def favicon():
+    icon = os.path.join(APP_DIR, "favicon.ico")
+    if os.path.isfile(icon):
+        return send_file(icon)
+    return ("", 204)
 
 
 @app.route("/api/status")
@@ -654,13 +693,11 @@ def api_clean_scenes():
     return jsonify({"scenes": scenes, "title": title})
 
 
-@app.route("/api/synthesize", methods=["POST"])
-def api_synthesize():
+def _synthesize_payload(data):
     """
-    Sintesis satu teks. Tanpa 'folder': file narasi_*.wav di output/.
-    Dengan 'folder' (mode scene): output/<folder>/scene_NN.wav.
+    Inti sintesis: dipakai bersama oleh /api/synthesize dan pekerja antrian.
+    Mengembalikan dict hasil; melempar ValueError untuk masukan yang tidak valid.
     """
-    data = request.get_json(silent=True) or {}
     engine = str(data.get("engine", "supertonic")).strip()
     text = str(data.get("text", "")).strip()
     voice_id = str(data.get("voice", "")).strip()
@@ -677,10 +714,10 @@ def api_synthesize():
     else:
         lines = None
     if not text:
-        return jsonify({"ok": False, "message": "Teks narasi kosong."}), 400
+        raise ValueError("Teks narasi kosong.")
     cleaned = cleaner.clean_text(text)
     if not cleaned:
-        return jsonify({"ok": False, "message": "Teks kosong setelah dibersihkan."}), 400
+        raise ValueError("Teks kosong setelah dibersihkan.")
 
     # Folder hasil = slug dari judul. Mode scene wajib punya folder (cadangan: scene-<tanggal>).
     title = str(data.get("title", "")).strip()
@@ -706,23 +743,17 @@ def api_synthesize():
     out_path = os.path.join(OUTPUT_DIR, out_filename)
 
     t0 = time.time()
-    try:
-        with lock_sintesis:
-            if lines:
-                wav, sr, warns = synthesize_lines(lines)
-            else:
-                (wav, sr), warns = synthesize_text(engine, cleaned, voice_id, speed, style=style), []
-    except ValueError as e:
-        return jsonify({"ok": False, "message": str(e)}), 400
-    except Exception as e:
-        print(f"❌ Sintesis gagal ({engine}): {e}", flush=True)
-        return jsonify({"ok": False, "message": str(e)}), 500
+    with lock_sintesis:
+        if lines:
+            wav, sr, warns = synthesize_lines(lines)
+        else:
+            (wav, sr), warns = synthesize_text(engine, cleaned, voice_id, speed, style=style), []
 
     sf.write(out_path, wav, sr)
     duration_sec = len(wav) / sr
     if folder and not preview:
         _record_info(folder, title, scene_no, cleaned, engine, voice_id, lines)
-    return jsonify({
+    return {
         "ok": True,
         "folder": folder,
         "engine": engine,
@@ -734,7 +765,23 @@ def api_synthesize():
         "size_bytes": os.path.getsize(out_path),
         "process_time_sec": round(time.time() - t0, 2),
         "warnings": warns,
-    })
+    }
+
+
+@app.route("/api/synthesize", methods=["POST"])
+def api_synthesize():
+    """
+    Sintesis satu teks. Tanpa 'folder': file narasi_*.wav di output/.
+    Dengan 'folder' (mode scene): output/<folder>/scene_NN.wav.
+    """
+    data = request.get_json(silent=True) or {}
+    try:
+        return jsonify(_synthesize_payload(data))
+    except ValueError as e:
+        return jsonify({"ok": False, "message": str(e)}), 400
+    except Exception as e:
+        print(f"❌ Sintesis gagal ({data.get('engine', 'supertonic')}): {e}", flush=True)
+        return jsonify({"ok": False, "message": str(e)}), 500
 
 
 @app.route("/api/zip/<folder>")
@@ -800,6 +847,134 @@ def api_history():
     return jsonify({"files": files[:25], "folders": folders[:15]})
 
 
+# --- Antrian: pekerja tunggal + endpoint -----------------------------------
+
+
+def _job_public(job: dict) -> dict:
+    """Salinan job untuk JSON (tanpa payload penuh agar respons ringkas)."""
+    payload = job.get("payload") or {}
+    lines = payload.get("lines")
+    return {
+        "id": job["id"],
+        "status": job["status"],
+        "type": job["type"],
+        "created_at": job["created_at"],
+        "started_at": job["started_at"],
+        "finished_at": job["finished_at"],
+        "message": job["message"],
+        "title": payload.get("title", ""),
+        "engine": job.get("engine") or ("teater" if isinstance(lines, list) else payload.get("engine", "")),
+        "result": job.get("result"),
+        "error": job.get("error"),
+    }
+
+
+def _prune_jobs():
+    """Batasi riwayat job di memori supaya tidak tumbuh tanpa batas."""
+    with job_store_lock:
+        if len(JOB_STORE) <= JOB_HISTORY_LIMIT:
+            return
+        done = sorted(
+            (j for j in JOB_STORE.values() if j["status"] in ("done", "error", "cancelled")),
+            key=lambda j: j.get("finished_at") or j["created_at"],
+        )
+        for job in done[: max(0, len(JOB_STORE) - JOB_HISTORY_LIMIT)]:
+            JOB_STORE.pop(job["id"], None)
+
+
+def queue_worker():
+    """Ambil satu job pada satu waktu, jalankan sintesis, perbarui statusnya."""
+    while True:
+        item = JOB_QUEUE.get()
+        jid = item.get("id")
+        payload = item.get("payload") or {}
+        with job_store_lock:
+            job = JOB_STORE.get(jid)
+            if job is None or job["status"] != "queued":
+                JOB_QUEUE.task_done()
+                continue
+            job["status"] = "running"
+            job["started_at"] = _now()
+            job["message"] = "Sedang diproses…"
+        try:
+            result = _synthesize_payload(payload)
+            with job_store_lock:
+                job = JOB_STORE.get(jid)
+                if job is not None:
+                    job.update(status="done", finished_at=_now(), result=result, message="Selesai")
+        except Exception as e:                     # job gagal tidak menghentikan pekerja
+            print(f"❌ Antrian job {jid} gagal: {e}", flush=True)
+            with job_store_lock:
+                job = JOB_STORE.get(jid)
+                if job is not None:
+                    job.update(status="error", finished_at=_now(), error=str(e), message=f"Gagal: {e}")
+        finally:
+            JOB_QUEUE.task_done()
+
+
+@app.route("/api/queue/enqueue", methods=["POST"])
+def api_queue_enqueue():
+    data = request.get_json(silent=True) or {}
+    jid = uuid.uuid4().hex
+    lines = data.get("lines")
+    job = {
+        "id": jid,
+        "type": "theater" if isinstance(lines, list) and lines else "synthesize",
+        "engine": data.get("engine", ""),
+        "payload": deepcopy(data),
+        "status": "queued",
+        "created_at": _now(),
+        "started_at": None,
+        "finished_at": None,
+        "result": None,
+        "error": None,
+        "message": "Menunggu di antrian",
+    }
+    with job_store_lock:
+        JOB_STORE[jid] = job
+    JOB_QUEUE.put({"id": jid, "payload": deepcopy(data)})
+    _prune_jobs()
+    return jsonify({"ok": True, "job_id": jid, "status": "queued", "position": JOB_QUEUE.qsize()})
+
+
+@app.route("/api/queue/list")
+def api_queue_list():
+    with job_store_lock:
+        items = [_job_public(j) for j in JOB_STORE.values()]
+    items.sort(key=lambda j: j["created_at"], reverse=True)
+    return jsonify({"ok": True, "items": items, "queued": JOB_QUEUE.qsize()})
+
+
+@app.route("/api/queue/jobs/<jid>")
+def api_queue_job(jid):
+    with job_store_lock:
+        job = JOB_STORE.get(jid)
+        if job is None:
+            return jsonify({"ok": False, "message": "Job tidak ditemukan"}), 404
+        return jsonify({"ok": True, "job": _job_public(job)})
+
+
+@app.route("/api/queue/clear_done", methods=["POST"])
+def api_queue_clear_done():
+    with job_store_lock:
+        to_delete = [k for k, v in JOB_STORE.items() if v["status"] in ("done", "error", "cancelled")]
+        for key in to_delete:
+            JOB_STORE.pop(key, None)
+    return jsonify({"ok": True, "deleted": len(to_delete)})
+
+
+@app.route("/api/queue/cancel/<jid>", methods=["POST"])
+def api_queue_cancel(jid):
+    with job_store_lock:
+        job = JOB_STORE.get(jid)
+        if job is None:
+            return jsonify({"ok": False, "message": "Job tidak ditemukan"}), 404
+        if job["status"] != "queued":
+            return jsonify({"ok": False, "message": "Hanya job yang masih menunggu bisa dibatalkan."}), 400
+        job.update(status="cancelled", finished_at=_now(), message="Dibatalkan")
+    return jsonify({"ok": True})
+
+
 # Hot reload: template UI langsung berlaku (cukup refresh browser); kode Python memicu restart otomatis.
 # Matikan dengan RELOAD=0 (atau ./run.sh --no-reload) saat sesi generate panjang, karena restart menghentikan sintesis
 # yang sedang berjalan dan menghapus slot suara Drama 3 yang hidup di memori.
@@ -813,6 +988,8 @@ if __name__ == "__main__":
     is_worker = (not RELOAD) or os.environ.get("WERKZEUG_RUN_MAIN") == "true"
     if is_worker:
         threading.Thread(target=prewarm_default_engines, daemon=True).start()
+        threading.Thread(target=queue_worker, daemon=True).start()
+        print("🧵 Pekerja antrian aktif (1 job sekaligus)", flush=True)
         print(f"🚀 Studio Narasi aktif di http://127.0.0.1:{port}" + ("  (hot reload aktif)" if RELOAD else ""), flush=True)
     app.run(
         host="0.0.0.0", port=port, debug=False,

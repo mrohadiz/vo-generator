@@ -1,0 +1,95 @@
+/* FieldNote UI — chart figure styles. Requires @fieldnote-ui/theme/styles.css. */
+
+.fn-chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fn-space-3);
+  margin: 0;
+  padding: var(--fn-space-5);
+  background: var(--fn-color-surface);
+  border: 1px solid var(--fn-color-border);
+  border-radius: var(--fn-radius-md);
+  box-shadow: var(--fn-shadow-xs);
+  color: var(--fn-color-text-primary);
+  min-width: 0;
+}
+.fn-chart__caption {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fn-space-1);
+}
+.fn-chart__title {
+  font-family: var(--fn-font-display);
+  font-size: var(--fn-text-lg);
+  font-weight: var(--fn-weight-semibold);
+  line-height: var(--fn-leading-lg);
+}
+.fn-chart__description {
+  font-size: var(--fn-text-sm);
+  color: var(--fn-color-text-secondary);
+}
+.fn-chart__canvas {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+.fn-chart__canvas .recharts-wrapper {
+  outline: none;
+}
+.fn-chart__table summary {
+  display: inline-flex;
+  min-height: 2rem;
+  align-items: center;
+  font-size: var(--fn-text-sm);
+  color: var(--fn-color-primary);
+  cursor: pointer;
+}
+.fn-chart__table-scroll {
+  overflow-x: auto;
+  margin-top: var(--fn-space-2);
+}
+.fn-chart__data {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fn-text-sm);
+}
+.fn-chart__data caption {
+  text-align: start;
+  padding-bottom: var(--fn-space-2);
+  color: var(--fn-color-text-secondary);
+}
+.fn-chart__data th,
+.fn-chart__data td {
+  padding: var(--fn-space-1-5) var(--fn-space-2);
+  border-bottom: 1px dashed var(--fn-color-border);
+  text-align: start;
+  vertical-align: top;
+}
+.fn-chart__data th[data-numeric],
+.fn-chart__data td {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+.fn-chart__data td:first-child,
+.fn-chart__data th[scope='row'] {
+  text-align: start;
+}
+.fn-chart__data tbody th {
+  font-weight: var(--fn-weight-regular);
+}
+
+@media print {
+  .fn-chart {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+  .fn-chart__table {
+    display: block;
+  }
+  .fn-chart__table summary {
+    display: none;
+  }
+  .fn-chart__table > div {
+    display: block;
+  }
+}

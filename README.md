@@ -21,31 +21,49 @@ mesin dan suara → generate. Hasil disimpan dalam folder bernama sesuai judul.
 
 ## Instalasi
 
-Kebutuhan sistem: Python 3.12, `ffmpeg`, dan `sox` (geser nada suara anak, dekode audio).
+Kebutuhan sistem: Python 3.12, `ffmpeg`, `sox` (geser nada suara anak, dekode audio), dan **Node.js 20+** dengan
+`pnpm` untuk membangun frontend.
 
 ```bash
 python3 -m venv .venv
-.venv/bin/pip install flask numpy soundfile pocket-tts supertonic gradio_client
+.venv/bin/pip install -r requirements.txt
 cp .env.example .env        # lalu isi sesuai kebutuhan; .env tidak ikut git
+
+# Frontend React (FieldNote UI) — cukup sekali, run.sh juga membangunnya otomatis bila belum ada
+cd frontend
+corepack enable pnpm
+pnpm install
+pnpm run build:vendor       # bangun paket desain @fieldnote-ui/*
+pnpm run build              # hasil -> ../static/app
+cd ..
 ```
 
 Hanya `flask`, `numpy`, `soundfile`, dan `supertonic` yang wajib untuk memakai Supertonic. `pocket-tts` perlu ±3 GB
 untuk model dan internet pada unduhan pertama. `gradio_client` hanya untuk Drama 3.
 
+Frontend memakai **FieldNote UI** (`rohadi-themes`): token warna `--fn-*`, tipografi editorial (Source Serif 4 +
+Inter + JetBrains Mono), dan komponen React. Paket desainnya di-*vendor* di `frontend/vendor/` (MIT) agar build
+tidak bergantung pada npm publik.
+
 ## Menjalankan
 
 ```bash
-./run.sh                    # http://127.0.0.1:5000, hot reload aktif
-./run.sh --no-reload        # tanpa hot reload (atau RELOAD=0)
-PORT=6066 ./run.sh          # port lain (default tetap 5055)
+./run.sh                    # http://127.0.0.1:5055, hot reload aktif
+./run.sh --no-reload        # tanpa hot reload (wajib untuk antrian jangka panjang)
+./run.sh --build            # paksa bangun ulang frontend
+PORT=6066 ./run.sh          # port lain (default 5055)
 ```
 
-- **Hot reload**: perubahan `templates/index.html` langsung berlaku (refresh browser); perubahan kode Python memicu
-  restart otomatis (±8 detik, termasuk memuat model). `output/`, `videos/`, `suara-kloning/`, dan `.venv/` tidak
-  memicu restart. Restart **menghentikan sintesis yang sedang berjalan** dan menghapus slot suara Drama 3, jadi
-  pakai `--no-reload` saat men-generate naskah panjang.
-- Supertonic dan Pocket-TTS dimuat di latar belakang saat start (titik hijau di pojok kanan atas).
-- Server mendengarkan di semua antarmuka (`0.0.0.0`).
+- **Frontend**: Flask menyajikan hasil build React dari `static/app/`. Bila folder itu belum ada, `run.sh`
+  menjalankan `pnpm install` + build lebih dulu.
+- **Pengembangan UI**: jalankan backend (`./run.sh --no-reload`) lalu `cd frontend && pnpm dev`. Vite di port 5173
+  meneruskan `/api` dan `/output` ke backend, dengan hot reload React.
+- **Hot reload Python**: perubahan `app.py`/`*.py` memicu restart (±8 detik, termasuk memuat model). `output/`,
+  `videos/`, `suara-kloning/`, `static/`, dan `.venv/` tidak memicu restart.
+- **Antrian**: job disimpan di memori. Restart server (termasuk hot reload) menghapus antrian, jadi pakai
+  `--no-reload` saat mengandalkan antrian. Satu pekerja memproses satu job pada satu waktu.
+- Supertonic dan Pocket-TTS dimuat di latar belakang saat start (status di kepala halaman).
+- Server mendengarkan di semua antarmuka (`0.0.0.0`), sehingga bisa diakses lewat Tailscale/LAN.
 
 ## Konfigurasi `.env`
 
@@ -111,13 +129,18 @@ selesaikan satu cerita dalam satu sesi. Bila gagal, baris otomatis dibacakan Sup
 2. Atau isi **URL** lalu klik *Ambil* untuk mengambil isi artikel/cerita (lewat Jina Reader; navigasi dan iklan dibuang). Hasil
    Jina yang ditempel langsung ke kotak naskah juga dikenali otomatis.
 3. Pilih mode:
-   - **Tanpa Scene**: *Cek & Bersihkan Teks* → (opsional) *Petakan Ekspresi & Jeda* → mesin dan suara → *Generate*.
+   - **Tanpa Scene**: *Cek & Bersihkan Teks* → (opsional) *Petakan Ekspresi & Jeda* → mesin dan suara → *Tambah ke
+     antrian* (atau *Generate langsung*).
    - **Dengan Scene**: tempel semua scene → *Rapikan / Bersihkan Scene* → edit per scene → *Generate*. Slider "gabung
      paragraf jadi scene" berlaku bila naskah tanpa pemisah scene.
-   - **Teater**: tempel cerita → *Analisis Cerita* → atur mesin, suara, nada, dan kecepatan tiap tokoh (▶ Coba untuk
-     mendengar) → koreksi baris dan emosi/jeda per baris → *Generate*. **Narator otomatis memakai Gemini** bila
+   - **Teater**: tempel cerita → *Analisis Cerita* → atur penyedia, suara, nada, dan kecepatan tiap tokoh (*Coba suara*
+     untuk mendengar) → koreksi baris dan emosi/jeda per baris → *Generate*. **Narator otomatis memakai Gemini** bila
      `GEMINI_KEY` ada; tokoh anak memakai Drama 3 bila `HF_TOKEN` ada.
 4. Hasil per scene: `output/<judul>/scene_01.wav`, `scene_02.wav`, … plus `info.json` (naskah, tokoh, baris). Ada tombol ZIP.
+5. **Antrian**: setiap klik *Tambah ke antrian* membuat satu job (mode scene/teater: satu job per scene). Panel
+   *Antrian generate* memperbarui status tiap 3 detik: Menunggu → Diproses → Selesai/Gagal. Job yang masih menunggu
+   bisa dibatalkan; hasil yang selesai bisa langsung diputar, diunduh, atau dibuka di tab terpisah. Satu pekerja
+   memproses satu job pada satu waktu, jadi aman untuk menyiapkan banyak naskah sekaligus.
 
 ## Format naskah
 
@@ -139,13 +162,15 @@ otomasi penuh: [`docs/PLAN-video.md`](docs/PLAN-video.md). Aset dan hasil render
 ## Struktur proyek
 
 ```
-app.py               Flask: routes, pemuatan mesin, sintesis, ZIP, riwayat, hot reload
+app.py               Flask: API, penyajian SPA, pemuatan mesin, sintesis, antrian, ZIP, riwayat, hot reload
 cleaner.py           Pembersihan teks, segmentasi, penanda jeda/emosi, scene, kata Inggris, ekstraksi artikel
 director.py          Pemetaan cerita dan ekspresi (AI + aturan), penetapan suara; PRIMARY_MODEL
 gemini_tts.py        Gemini TTS: suara, gaya dari emosi, pembatas laju, cadangan OmniRoute
 drama3.py            Drama 3 (Space HF): cast, keep_voice, clone, unduh HLS
-templates/index.html UI satu berkas (JS vanilla)
-run.sh               Peluncur (hot reload)
+frontend/            UI React + Vite (FieldNote UI): src/, vendor/ (paket desain), pnpm workspace
+static/app/          Hasil build frontend yang disajikan Flask (dibuat oleh run.sh, tidak ikut git)
+templates/index.html UI lama (satu berkas, JS vanilla) — tidak dipakai lagi, disimpan sebagai rujukan
+run.sh               Peluncur: bangun frontend bila perlu, lalu jalankan Flask
 videos/              Proyek video HyperFrames
 docs/                Rencana dan catatan
 tts-kloning.py       Servis kloning mandiri (versi awal)
@@ -153,6 +178,16 @@ bench_supertonic.py  Benchmark Supertonic
 suara-kloning/       Sampel suara Pocket-TTS (tidak ikut git)
 output/              Hasil audio (tidak ikut git)
 ```
+
+## Frontend
+
+- **Stack**: React 19 + Vite + TypeScript, Tailwind v3 memakai preset `@fieldnote-ui/theme`, komponen dari
+  `@fieldnote-ui/ui` (Button, StatusChip, Tag, Meter, ThemeToggle), layout dan token `--fn-*`.
+- **Tema**: terang (paper) sebagai bawaan; tombol Light/Dark/System ada di kanan atas dan tersimpan di browser.
+- **Struktur**: `src/App.tsx` menyimpan state alur, `src/components/*` memecah panel per mode, `src/api.ts`
+  membungkus endpoint Flask, `src/hooks.ts` menangani polling status/antrian/riwayat.
+- **Vendor**: `frontend/vendor/{tokens,theme,icons,ui,layouts,charts}` adalah salinan paket FieldNote UI (MIT) yang
+  dibangun lokal lewat `pnpm run build:vendor`.
 
 ## API
 
@@ -167,6 +202,11 @@ output/              Hasil audio (tidak ikut git)
 | `POST /api/annotate` | `{texts[], use_ai}` → teks berpenanda `[emosi]`/`[jeda]` |
 | `POST /api/direct` | `{text, use_ai}` → scene, tokoh, baris, usulan suara |
 | `POST /api/synthesize` | `{engine, text, voice, speed, style?, title, scene?}` atau `{lines[], title, scene}` → WAV |
+| `POST /api/queue/enqueue` | Payload sama dengan `/api/synthesize` → `{ok, job_id, position}` |
+| `GET /api/queue/list` | Daftar job antrian + jumlah yang menunggu |
+| `GET /api/queue/jobs/<id>` | Status satu job |
+| `POST /api/queue/cancel/<id>` | Batalkan job yang masih menunggu |
+| `POST /api/queue/clear_done` | Hapus job selesai/gagal/dibatalkan dari riwayat |
 | `GET /api/zip/<folder>` | ZIP seluruh scene dalam folder |
 | `GET /api/history` | Audio terbaru dan folder scene |
 | `GET /output/<path>` | Berkas hasil |
@@ -189,4 +229,10 @@ output/              Hasil audio (tidak ikut git)
 - **Gemini 429 / lambat**: batas ±4 panggilan/menit pada kunci langsung; otomatis diatur dan dicoba ulang, atau pilih
   "Gemini via OmniRoute".
 - **Drama 3 gagal**: kuota ZeroGPU akun habis; baris jatuh ke Supertonic dengan peringatan ⚠️.
+- **"Frontend belum dibangun" (503)**: jalankan `./run.sh --build`, atau `cd frontend && pnpm install && pnpm run
+  build:vendor && pnpm run build`.
+- **Antrian hilang setelah edit kode**: hot reload me-restart proses dan menghapus job di memori. Jalankan dengan
+  `./run.sh --no-reload` saat mengandalkan antrian.
+- **Perubahan UI tidak muncul saat `pnpm build`**: hasil ditulis ke `static/app/`; muat ulang browser dengan
+  hard refresh (Ctrl+Shift+R) agar CSS/JS lama tidak terpakai.
 - **Sintesis terputus di tengah**: hot reload me-restart server saat kode berubah; gunakan `./run.sh --no-reload`.

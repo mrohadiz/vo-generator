@@ -1,0 +1,251 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Kerangka halaman ─────────────────────────────────────────────────── */
+
+.fn-shell {
+  max-width: var(--fn-measure-page, 72rem);
+  margin-inline: auto;
+  padding: var(--fn-space-6) var(--fn-space-4) var(--fn-space-10);
+}
+
+@media (min-width: 900px) {
+  .fn-shell {
+    padding-inline: var(--fn-space-6);
+  }
+}
+
+/* ── Permukaan / kartu ────────────────────────────────────────────────── */
+
+.fn-card {
+  background: var(--fn-color-surface);
+  border: 1px solid var(--fn-color-border);
+  border-radius: var(--fn-radius-lg);
+  box-shadow: var(--fn-shadow-sm, 0 1px 2px rgb(42 40 32 / 0.06));
+}
+
+.fn-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fn-space-3);
+  flex-wrap: wrap;
+  padding: var(--fn-space-4) var(--fn-space-5);
+  border-bottom: 1px solid var(--fn-color-border);
+}
+
+.fn-card__title {
+  font-family: var(--fn-font-display);
+  font-size: var(--fn-text-lg);
+  font-weight: var(--fn-weight-semibold);
+  letter-spacing: var(--fn-tracking-tight);
+  margin: 0;
+}
+
+.fn-card__body {
+  padding: var(--fn-space-5);
+}
+
+.fn-card__body--tight {
+  padding: var(--fn-space-3);
+}
+
+/* ── Kicker & metadata ────────────────────────────────────────────────── */
+
+.fn-kicker {
+  font-family: var(--fn-font-body);
+  font-size: var(--fn-text-xs);
+  font-weight: var(--fn-weight-semibold);
+  letter-spacing: var(--fn-tracking-wide);
+  text-transform: uppercase;
+  color: var(--fn-color-text-tertiary);
+  margin: 0;
+}
+
+.fn-meta {
+  font-family: var(--fn-font-mono);
+  font-size: var(--fn-text-xs);
+  color: var(--fn-color-text-tertiary);
+}
+
+/* ── Form controls ────────────────────────────────────────────────────── */
+
+.fn-input,
+.fn-textarea,
+.fn-select {
+  width: 100%;
+  font: inherit;
+  font-size: var(--fn-text-sm);
+  color: var(--fn-color-text-primary);
+  background: var(--fn-color-surface);
+  border: 1px solid var(--fn-color-border-strong);
+  border-radius: var(--fn-radius-sm);
+  padding: var(--fn-space-2) var(--fn-space-3);
+  transition: border-color var(--fn-duration-fast) var(--fn-ease-standard);
+}
+
+.fn-input:hover,
+.fn-textarea:hover,
+.fn-select:hover {
+  border-color: var(--fn-color-text-tertiary);
+}
+
+.fn-textarea {
+  min-height: 9rem;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.fn-textarea--tall {
+  min-height: 18rem;
+}
+
+.fn-label {
+  display: block;
+  font-size: var(--fn-text-sm);
+  font-weight: var(--fn-weight-medium);
+  color: var(--fn-color-text-secondary);
+  margin-bottom: var(--fn-space-1);
+}
+
+.fn-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fn-space-1);
+}
+
+/* Rentang (slider) mengikuti warna aksen tema. */
+.fn-range {
+  width: 100%;
+  accent-color: var(--fn-color-primary);
+}
+
+/* ── Nota / peringatan ────────────────────────────────────────────────── */
+
+.fn-note {
+  border-radius: var(--fn-radius-sm);
+  border: 1px solid var(--fn-intent-decision-border);
+  background: var(--fn-intent-decision-tint);
+  color: var(--fn-intent-decision-text);
+  padding: var(--fn-space-2) var(--fn-space-3);
+  font-size: var(--fn-text-sm);
+}
+
+.fn-note--info {
+  border-color: var(--fn-intent-evidence-border);
+  background: var(--fn-intent-evidence-tint);
+  color: var(--fn-intent-evidence-text);
+}
+
+.fn-note--danger {
+  border-color: var(--fn-color-danger);
+  background: color-mix(in srgb, var(--fn-color-danger) 10%, var(--fn-color-surface));
+  color: var(--fn-color-danger-text);
+}
+
+/* ── Baris audio di riwayat / hasil ───────────────────────────────────── */
+
+.fn-audio-row {
+  display: flex;
+  align-items: center;
+  gap: var(--fn-space-3);
+  flex-wrap: wrap;
+  padding: var(--fn-space-2) var(--fn-space-3);
+  border: 1px solid var(--fn-color-border);
+  border-radius: var(--fn-radius-sm);
+  background: var(--fn-color-surface);
+}
+
+.fn-audio-row audio {
+  height: 32px;
+  max-width: 15rem;
+  flex: 1 1 12rem;
+}
+
+.fn-audio-row__name {
+  font-family: var(--fn-font-mono);
+  font-size: var(--fn-text-xs);
+  color: var(--fn-color-text-secondary);
+  flex: 1 1 10rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* ── Tabel ────────────────────────────────────────────────────────────── */
+
+.fn-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fn-text-sm);
+}
+
+.fn-table th {
+  text-align: left;
+  font-family: var(--fn-font-body);
+  font-size: var(--fn-text-xs);
+  font-weight: var(--fn-weight-semibold);
+  letter-spacing: var(--fn-tracking-wide);
+  text-transform: uppercase;
+  color: var(--fn-color-text-tertiary);
+  padding: var(--fn-space-2) var(--fn-space-3);
+  border-bottom: 1px solid var(--fn-color-border-strong);
+  white-space: nowrap;
+}
+
+.fn-table td {
+  padding: var(--fn-space-3);
+  border-bottom: 1px solid var(--fn-color-border);
+  vertical-align: top;
+}
+
+.fn-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.fn-table tbody tr:hover {
+  background: var(--fn-color-surface-sunken);
+}
+
+/* ── Segmen kalimat ───────────────────────────────────────────────────── */
+
+.fn-segment {
+  display: flex;
+  gap: var(--fn-space-2);
+  padding: var(--fn-space-1) 0;
+  border-bottom: 1px dashed var(--fn-color-border);
+  font-size: var(--fn-text-sm);
+}
+
+.fn-segment:last-child {
+  border-bottom: 0;
+}
+
+/* ── Utilitas kecil ───────────────────────────────────────────────────── */
+
+.fn-row {
+  display: flex;
+  align-items: center;
+  gap: var(--fn-space-2);
+  flex-wrap: wrap;
+}
+
+.fn-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fn-space-4);
+}
+
+.fn-scroll-x {
+  overflow-x: auto;
+}
+
+.fn-spin {
+  animation: fn-spin 0.9s linear infinite;
+}
+
+@keyframes fn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
