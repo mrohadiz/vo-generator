@@ -152,6 +152,16 @@ export interface QueueJob {
   engine: string;
   result: JobResult | null;
   error: string | null;
+  /** Perkiraan durasi audio yang akan dihasilkan (detik). */
+  est_audio_sec: number;
+  /** Perkiraan waktu proses (detik) berdasarkan kata dan mesin. */
+  est_process_sec: number;
+  /** Sudah berjalan berapa detik (job selesai: total waktu proses). */
+  elapsed_sec: number;
+  /** Sisa waktu perkiraan (detik); untuk job menunggu = est_process_sec. */
+  eta_sec: number;
+  /** 0..1, diperkirakan dari elapsed / est_process_sec (maks 0,97 saat berjalan). */
+  progress: number;
 }
 
 export interface QueueList {

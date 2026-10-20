@@ -1,6 +1,6 @@
 import { Button, StatusChip } from '@fieldnote-ui/ui';
 import type { QueueJob } from '../types';
-import { fmtDate } from '../lib';
+import { fmtDate, fmtDur } from '../lib';
 import { Card, Empty } from './ui';
 
 const TONE: Record<QueueJob['status'], 'neutral' | 'info' | 'positive' | 'negative' | 'caution'> = {
@@ -42,7 +42,12 @@ export function QueuePanel({
       title="Antrian generate"
       actions={
         <>
-          <span className="fn-meta">{queued} menunggu</span>
+          <span className="fn-meta">
+            {items.filter((j) => j.status === 'running').length > 0
+              ? `${items.filter((j) => j.status === 'running').length} diproses · `
+              : ''}
+            {queued} menunggu
+          </span>
           <Button variant="ghost" size="sm" onClick={onRefresh}>
             Segarkan
           </Button>
@@ -72,6 +77,7 @@ export function QueuePanel({
                 <tr key={job.id}>
                   <td>
                     <StatusChip tone={TONE[job.status]}>{LABEL[job.status]}</StatusChip>
+                    <JobTiming job={job} />
                     {job.status === 'error' && job.error ? (
                       <div className="fn-meta mt-1" style={{ maxWidth: '14rem', color: 'var(--fn-color-danger-text)' }}>
                         {job.error}
@@ -99,6 +105,41 @@ export function QueuePanel({
       )}
     </Card>
   );
+}
+
+/** Perkiraan kemajuan & sisa waktu, dihitung server dari jumlah kata dan mesin. */
+function JobTiming({ job }: { job: QueueJob }) {
+  if (job.status === 'running') {
+    const pct = Math.round(Math.min(0.97, Math.max(0, job.progress)) * 100);
+    return (
+      <div className="mt-1" style={{ minWidth: '9rem', maxWidth: '12rem' }}>
+        <div
+          className="fn-progress"
+          role="progressbar"
+          aria-label="Perkiraan kemajuan job"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={pct}
+        >
+          <span style={{ width: `${pct}%` }} />
+        </div>
+        <div className="fn-meta" style={{ marginTop: 3 }}>
+          {job.eta_sec >= 5 ? `±${fmtDur(job.eta_sec)} lagi · ${pct}%` : `hampir selesai · ${pct}%`}
+        </div>
+      </div>
+    );
+  }
+  if (job.status === 'queued') {
+    return (
+      <div className="fn-meta mt-1" style={{ maxWidth: '12rem' }}>
+        perkiraan ±{fmtDur(job.est_process_sec)} · audio ±{fmtDur(job.est_audio_sec)}
+      </div>
+    );
+  }
+  if (job.status === 'done') {
+    return <div className="fn-meta mt-1">selesai dalam {fmtDur(job.elapsed_sec)}</div>;
+  }
+  return null;
 }
 
 function JobActions({

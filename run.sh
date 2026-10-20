@@ -11,8 +11,8 @@ if [ ! -f ".venv/bin/python" ]; then
 fi
 
 # Hot reload aktif secara bawaan: ubah kode lalu server restart sendiri.
-# ./run.sh --no-reload  (atau RELOAD=0) untuk sesi generate panjang dan saat memakai antrian,
-# karena restart menghapus job yang masih menunggu di memori.
+# ./run.sh --no-reload  (atau RELOAD=0) untuk sesi generate panjang: antrian tersimpan di
+# queue_state.json dan dipulihkan, tetapi job yang sedang berjalan akan diulang dari awal.
 RELOAD="${RELOAD:-1}"
 BUILD=0
 for arg in "$@"; do
@@ -21,7 +21,7 @@ for arg in "$@"; do
         --build) BUILD=1 ;;
         --help|-h)
             echo "Pemakaian: ./run.sh [--no-reload] [--build]"
-            echo "  --no-reload  matikan hot reload (wajib untuk antrian jangka panjang)"
+            echo "  --no-reload  matikan hot reload (disarankan untuk naskah panjang)"
             echo "  --build      paksa bangun ulang frontend React"
             exit 0
             ;;

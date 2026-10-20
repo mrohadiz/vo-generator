@@ -172,6 +172,23 @@
   overflow-wrap: anywhere;
 }
 
+/* ── Kemajuan job antrian ─────────────────────────────────────────────── */
+
+.fn-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--fn-color-surface-sunken);
+  overflow: hidden;
+}
+
+.fn-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--fn-color-primary);
+  border-radius: inherit;
+  transition: width 0.4s var(--fn-ease-standard, ease);
+}
+
 /* ── Tabel ────────────────────────────────────────────────────────────── */
 
 .fn-table {

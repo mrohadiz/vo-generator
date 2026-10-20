@@ -49,7 +49,7 @@ tidak bergantung pada npm publik.
 
 ```bash
 ./run.sh                    # http://127.0.0.1:5055, hot reload aktif
-./run.sh --no-reload        # tanpa hot reload (wajib untuk antrian jangka panjang)
+./run.sh --no-reload        # tanpa hot reload (disarankan untuk naskah panjang)
 ./run.sh --build            # paksa bangun ulang frontend
 PORT=6066 ./run.sh          # port lain (default 5055)
 ```
@@ -60,8 +60,9 @@ PORT=6066 ./run.sh          # port lain (default 5055)
   meneruskan `/api` dan `/output` ke backend, dengan hot reload React.
 - **Hot reload Python**: perubahan `app.py`/`*.py` memicu restart (±8 detik, termasuk memuat model). `output/`,
   `videos/`, `suara-kloning/`, `static/`, dan `.venv/` tidak memicu restart.
-- **Antrian**: job disimpan di memori. Restart server (termasuk hot reload) menghapus antrian, jadi pakai
-  `--no-reload` saat mengandalkan antrian. Satu pekerja memproses satu job pada satu waktu.
+- **Antrian**: job disimpan di memori dan dicadangkan ke `queue_state.json` setiap kali statusnya berubah. Saat
+  server dinyalakan ulang, job yang masih menunggu dimasukkan lagi ke antrian, dan job yang terputus di tengah
+  (termasuk karena hot reload) diulang dari awal. Satu pekerja memproses satu job pada satu waktu.
 - Supertonic dan Pocket-TTS dimuat di latar belakang saat start (status di kepala halaman).
 - Server mendengarkan di semua antarmuka (`0.0.0.0`), sehingga bisa diakses lewat Tailscale/LAN.
 
@@ -142,6 +143,10 @@ selesaikan satu cerita dalam satu sesi. Bila gagal, baris otomatis dibacakan Sup
    bisa dibatalkan; hasil yang selesai bisa langsung diputar, diunduh, atau dibuka di tab terpisah. Satu pekerja
    memproses satu job pada satu waktu, jadi aman untuk menyiapkan banyak naskah sekaligus. Tombol *Hapus* pada
    baris selesai hanya membuang catatan job (berkas tetap ada).
+   - **Estimasi**: job yang menunggu menampilkan perkiraan waktu proses dan durasi audio; job yang berjalan
+     menampilkan bilah kemajuan, sisa waktu, dan persentase. Angka ini dihitung dari jumlah kata × detik-per-kata
+     mesin, lalu **diperbarui otomatis dari hasil nyata** tiap job selesai (disimpan di `queue_state.json`), jadi
+     makin sering dipakai makin akurat. Bilah kemajuan berhenti di 97% sampai job benar-benar selesai.
 6. **Coba suara**: panel kanan punya tombol *Coba suara <nama>* untuk mendengarkan contoh tiap suara sebelum
    men-generate. Pocket-TTS memakai berkas referensi; Supertonic dan Gemini disintesis sekali lalu di-cache di
    `output/_voice_samples/` (*Buat ulang* untuk menyegarkan).
@@ -182,6 +187,7 @@ frontend/            UI React + Vite (FieldNote UI): src/, vendor/ (paket desain
 static/app/          Hasil build frontend yang disajikan Flask (dibuat oleh run.sh, tidak ikut git)
 templates/index.html UI lama (satu berkas, JS vanilla) — tidak dipakai lagi, disimpan sebagai rujukan
 run.sh               Peluncur: bangun frontend bila perlu, lalu jalankan Flask
+queue_state.json     Cadangan antrian + statistik detik-per-kata (dibuat otomatis, tidak ikut git)
 videos/              Proyek video HyperFrames
 docs/                Rencana dan catatan
 tts-kloning.py       Servis kloning mandiri (versi awal)
@@ -248,8 +254,10 @@ output/              Hasil audio (tidak ikut git)
 - **Drama 3 gagal**: kuota ZeroGPU akun habis; baris jatuh ke Supertonic dengan peringatan ⚠️.
 - **"Frontend belum dibangun" (503)**: jalankan `./run.sh --build`, atau `cd frontend && pnpm install && pnpm run
   build:vendor && pnpm run build`.
-- **Antrian hilang setelah edit kode**: hot reload me-restart proses dan menghapus job di memori. Jalankan dengan
-  `./run.sh --no-reload` saat mengandalkan antrian.
+- **Job antrian diulang setelah edit kode**: hot reload me-restart proses, jadi job yang sedang berjalan diulang
+  dari awal (job yang masih menunggu tetap aman). Pakai `./run.sh --no-reload` saat menjalankan naskah panjang.
+- **Antrian tidak kembali setelah restart**: pastikan `queue_state.json` ada dan bisa ditulis. Bila berkas itu
+  rusak/terhapus, antrian dimulai kosong; hasil audio yang sudah selesai tetap ada di `output/`.
 - **Perubahan UI tidak muncul saat `pnpm build`**: hasil ditulis ke `static/app/`; muat ulang browser dengan
   hard refresh (Ctrl+Shift+R) agar CSS/JS lama tidak terpakai.
 - **Sintesis terputus di tengah**: hot reload me-restart server saat kode berubah; gunakan `./run.sh --no-reload`.

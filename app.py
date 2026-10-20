@@ -11,6 +11,8 @@ import os
 import sys
 import time
 import datetime
+import json
+import re
 import threading
 import queue
 import uuid
@@ -62,17 +64,122 @@ SUPERTONIC_VOICES = [
 # Global lock untuk menjaga eksekusi sintesis aman di CPU
 lock_sintesis = threading.Lock()
 
-# --- Antrian pekerjaan (in-memory, satu pekerja) ---------------------------
-# Job disimpan di RAM: restart server menghapus antrian. Karena itu mode antrian
-# dijalankan dengan RELOAD=0 (lihat run.sh) supaya hot reload tidak menghapus job.
+# --- Antrian pekerjaan (satu pekerja) --------------------------------------
+# Job disimpan di memori DAN dicadangkan ke queue_state.json setiap kali statusnya
+# berubah. Saat server dinyalakan ulang, job yang masih menunggu/terputus dimasukkan
+# kembali ke antrian, jadi restart (termasuk hot reload) tidak lagi menghilangkan job.
 JOB_QUEUE: "queue.Queue[dict]" = queue.Queue()
 JOB_STORE: dict = {}
 job_store_lock = threading.Lock()
 JOB_HISTORY_LIMIT = int(os.environ.get("JOB_HISTORY_LIMIT", "200"))
+QUEUE_STATE_PATH = os.path.join(BASE_DIR, "queue_state.json")
 
 
 def _now() -> float:
     return time.time()
+
+
+# Perkiraan waktu proses per kata, per mesin (detik). Nilai awal kasar; setiap job yang
+# selesai memperbarui angkanya (rata-rata bergerak) dan disimpan bersama antrian.
+QUEUE_SPW = {"supertonic": 0.9, "pocket_tts": 4.0, "gemini_tts": 0.9, "gemini_gw": 0.6, "theater": 1.0}
+
+
+def _payload_kind(data: dict) -> tuple[str, str]:
+    """(jenis untuk statistik, teks gabungan) dari payload job."""
+    lines = data.get("lines")
+    if isinstance(lines, list) and lines:
+        text = " ".join(str(ln.get("text", "")) for ln in lines if isinstance(ln, dict))
+        return "theater", text
+    return (str(data.get("engine") or "supertonic")), str(data.get("text", ""))
+
+
+def _count_words(text: str) -> int:
+    return len(re.findall(r"[A-Za-z0-9]+", re.sub(r"\[[^\]]*\]|\([^)]*\)", " ", text)))
+
+
+def _estimate_job_seconds(data: dict) -> tuple[float, float, int]:
+    """(perkiraan durasi audio, perkiraan waktu proses, jumlah kata)."""
+    kind, text = _payload_kind(data)
+    words = _count_words(text)
+    audio = max(1.0, words / 140 * 60)                          # 140 kata per menit
+    proc = max(2.0, words * QUEUE_SPW.get(kind, 0.9) + 2.0)     # +2 detik untuk overhead model
+    return round(audio, 1), round(proc, 1), words
+
+
+def _learn_spw(job: dict, result: dict):
+    """Perbarui perkiraan detik-per-kata dari hasil nyata (rata-rata bergerak 65/35)."""
+    words = int(job.get("word_count") or 0)
+    try:
+        proc = float((result or {}).get("process_time_sec") or 0)
+    except (TypeError, ValueError):
+        proc = 0
+    if words < 5 or proc <= 0:
+        return
+    sample = proc / words
+    if not (0.02 <= sample <= 30):
+        return
+    key = "theater" if job.get("type") == "theater" else (job.get("engine") or "supertonic")
+    old = QUEUE_SPW.get(key)
+    QUEUE_SPW[key] = round(sample if old is None else old * 0.65 + sample * 0.35, 3)
+
+
+def _save_jobs_locked():
+    """Tulis isi JOB_STORE ke disk. Pemanggil WAJIB memegang job_store_lock."""
+    tmp = QUEUE_STATE_PATH + ".tmp"
+    try:
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump({"version": 1, "jobs": list(JOB_STORE.values()), "spw": QUEUE_SPW}, f, ensure_ascii=False)
+        os.replace(tmp, QUEUE_STATE_PATH)
+    except Exception as e:
+        print(f"⚠️  Gagal menyimpan antrian ke disk: {e}", flush=True)
+
+
+def _save_jobs():
+    with job_store_lock:
+        _save_jobs_locked()
+
+
+def restore_jobs():
+    """Muat antrian dari disk. Job 'running' (terputus saat restart) diulang dari awal."""
+    if not os.path.isfile(QUEUE_STATE_PATH):
+        return
+    try:
+        with open(QUEUE_STATE_PATH, encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception as e:
+        print(f"⚠️  Antrian tersimpan tidak terbaca ({e}); mulai dengan antrian kosong.", flush=True)
+        return
+
+    for key, value in (data.get("spw") or {}).items():
+        try:
+            QUEUE_SPW[str(key)] = float(value)
+        except (TypeError, ValueError):
+            pass
+
+    resumed = 0
+    with job_store_lock:
+        for job in data.get("jobs") or []:
+            jid = job.get("id")
+            if not jid:
+                continue
+            if not job.get("est_process_sec"):                  # job lama: lengkapi estimasinya
+                est_audio, est_proc, words = _estimate_job_seconds(job.get("payload") or {})
+                job["est_audio_sec"], job["est_process_sec"] = est_audio, est_proc
+                job.setdefault("word_count", words)
+            was = job.get("status")
+            if was in ("queued", "running"):
+                job["status"] = "queued"
+                job["started_at"] = None
+                job["finished_at"] = None
+                job["error"] = None
+                job["message"] = ("Dilanjutkan setelah server dinyalakan ulang"
+                                  if was == "running" else "Menunggu di antrian")
+                JOB_QUEUE.put({"id": jid, "payload": job.get("payload") or {}})
+                resumed += 1
+            JOB_STORE[jid] = job
+        _save_jobs_locked()
+    if JOB_STORE:
+        print(f"♻️  Antrian dipulihkan: {len(JOB_STORE)} job, {resumed} akan diproses", flush=True)
 
 # Status kesiapan engine
 engine_status = {
@@ -980,9 +1087,26 @@ def _job_public(job: dict) -> dict:
     """Salinan job untuk JSON (tanpa payload penuh agar respons ringkas)."""
     payload = job.get("payload") or {}
     lines = payload.get("lines")
+    status = job["status"]
+    est_proc = float(job.get("est_process_sec") or 0)
+
+    elapsed = 0.0
+    eta = 0.0
+    progress = 0.0
+    if status == "running" and job.get("started_at"):
+        elapsed = max(0.0, _now() - job["started_at"])
+        progress = min(0.97, elapsed / est_proc) if est_proc > 0 else 0.0
+        eta = max(0.0, est_proc - elapsed) if est_proc > 0 else 0.0
+    elif status == "done":
+        progress = 1.0
+        if job.get("started_at") and job.get("finished_at"):
+            elapsed = max(0.0, job["finished_at"] - job["started_at"])
+    elif status == "queued":
+        eta = est_proc
+
     return {
         "id": job["id"],
-        "status": job["status"],
+        "status": status,
         "type": job["type"],
         "created_at": job["created_at"],
         "started_at": job["started_at"],
@@ -992,6 +1116,11 @@ def _job_public(job: dict) -> dict:
         "engine": job.get("engine") or ("teater" if isinstance(lines, list) else payload.get("engine", "")),
         "result": job.get("result"),
         "error": job.get("error"),
+        "est_audio_sec": job.get("est_audio_sec") or 0,
+        "est_process_sec": est_proc,
+        "elapsed_sec": round(elapsed, 1),
+        "eta_sec": round(eta, 1),
+        "progress": round(progress, 3),
     }
 
 
@@ -1006,6 +1135,7 @@ def _prune_jobs():
         )
         for job in done[: max(0, len(JOB_STORE) - JOB_HISTORY_LIMIT)]:
             JOB_STORE.pop(job["id"], None)
+        _save_jobs_locked()
 
 
 def queue_worker():
@@ -1022,18 +1152,22 @@ def queue_worker():
             job["status"] = "running"
             job["started_at"] = _now()
             job["message"] = "Sedang diproses…"
+            _save_jobs_locked()
         try:
             result = _synthesize_payload(payload)
             with job_store_lock:
                 job = JOB_STORE.get(jid)
                 if job is not None:
                     job.update(status="done", finished_at=_now(), result=result, message="Selesai")
+                    _learn_spw(job, result)
+                    _save_jobs_locked()
         except Exception as e:                     # job gagal tidak menghentikan pekerja
             print(f"❌ Antrian job {jid} gagal: {e}", flush=True)
             with job_store_lock:
                 job = JOB_STORE.get(jid)
                 if job is not None:
                     job.update(status="error", finished_at=_now(), error=str(e), message=f"Gagal: {e}")
+                    _save_jobs_locked()
         finally:
             JOB_QUEUE.task_done()
 
@@ -1043,6 +1177,7 @@ def api_queue_enqueue():
     data = request.get_json(silent=True) or {}
     jid = uuid.uuid4().hex
     lines = data.get("lines")
+    est_audio, est_proc, word_count = _estimate_job_seconds(data)
     job = {
         "id": jid,
         "type": "theater" if isinstance(lines, list) and lines else "synthesize",
@@ -1055,9 +1190,13 @@ def api_queue_enqueue():
         "result": None,
         "error": None,
         "message": "Menunggu di antrian",
+        "est_audio_sec": est_audio,
+        "est_process_sec": est_proc,
+        "word_count": word_count,
     }
     with job_store_lock:
         JOB_STORE[jid] = job
+        _save_jobs_locked()
     JOB_QUEUE.put({"id": jid, "payload": deepcopy(data)})
     _prune_jobs()
     return jsonify({"ok": True, "job_id": jid, "status": "queued", "position": JOB_QUEUE.qsize()})
@@ -1086,6 +1225,7 @@ def api_queue_clear_done():
         to_delete = [k for k, v in JOB_STORE.items() if v["status"] in ("done", "error", "cancelled")]
         for key in to_delete:
             JOB_STORE.pop(key, None)
+        _save_jobs_locked()
     return jsonify({"ok": True, "deleted": len(to_delete)})
 
 
@@ -1098,6 +1238,7 @@ def api_queue_cancel(jid):
         if job["status"] != "queued":
             return jsonify({"ok": False, "message": "Hanya job yang masih menunggu bisa dibatalkan."}), 400
         job.update(status="cancelled", finished_at=_now(), message="Dibatalkan")
+        _save_jobs_locked()
     return jsonify({"ok": True})
 
 
@@ -1111,12 +1252,12 @@ def api_queue_remove(jid):
         if job["status"] in ("queued", "running"):
             return jsonify({"ok": False, "message": "Batalkan dulu sebelum menghapus."}), 400
         JOB_STORE.pop(jid, None)
+        _save_jobs_locked()
     return jsonify({"ok": True})
 
 
-# Hot reload: template UI langsung berlaku (cukup refresh browser); kode Python memicu restart otomatis.
-# Matikan dengan RELOAD=0 (atau ./run.sh --no-reload) saat sesi generate panjang, karena restart menghentikan sintesis
-# yang sedang berjalan dan menghapus slot suara Drama 3 yang hidup di memori.
+# Hot reload: kode Python memicu restart otomatis. Antrian kini disimpan di queue_state.json dan dipulihkan saat start,
+# tetapi job yang sedang berjalan akan diulang dari awal. Slot suara Drama 3 tetap hidup di memori dan hilang saat restart.
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 RELOAD = os.environ.get("RELOAD", "1") != "0"
 
@@ -1126,6 +1267,7 @@ if __name__ == "__main__":
     # Dengan reloader proses induk hanya mengawasi berkas; model dimuat di proses anak (WERKZEUG_RUN_MAIN=true)
     is_worker = (not RELOAD) or os.environ.get("WERKZEUG_RUN_MAIN") == "true"
     if is_worker:
+        restore_jobs()
         threading.Thread(target=prewarm_default_engines, daemon=True).start()
         threading.Thread(target=queue_worker, daemon=True).start()
         print("🧵 Pekerja antrian aktif (1 job sekaligus)", flush=True)
