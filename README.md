@@ -37,7 +37,7 @@ untuk model dan internet pada unduhan pertama. `gradio_client` hanya untuk Drama
 ```bash
 ./run.sh                    # http://127.0.0.1:5000, hot reload aktif
 ./run.sh --no-reload        # tanpa hot reload (atau RELOAD=0)
-PORT=5055 ./run.sh          # port lain
+PORT=6066 ./run.sh          # port lain (default tetap 5055)
 ```
 
 - **Hot reload**: perubahan `templates/index.html` langsung berlaku (refresh browser); perubahan kode Python memicu

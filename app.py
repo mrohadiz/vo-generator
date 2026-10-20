@@ -808,7 +808,7 @@ RELOAD = os.environ.get("RELOAD", "1") != "0"
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", "5000"))
+    port = int(os.environ.get("PORT", "5055"))
     # Dengan reloader proses induk hanya mengawasi berkas; model dimuat di proses anak (WERKZEUG_RUN_MAIN=true)
     is_worker = (not RELOAD) or os.environ.get("WERKZEUG_RUN_MAIN") == "true"
     if is_worker:

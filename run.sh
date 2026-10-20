@@ -17,6 +17,6 @@ for arg in "$@"; do
 done
 export RELOAD="${RELOAD:-1}"
 
-PORT="${PORT:-5000}"
+PORT="${PORT:-5055}"
 echo "🎙️ Menjalankan Studio Narasi di http://127.0.0.1:$PORT (hot reload: $([ "$RELOAD" = "0" ] && echo mati || echo aktif))"
 exec .venv/bin/python app.py
