@@ -103,6 +103,27 @@ export interface DirectResult {
   gemini_gw_available: boolean;
 }
 
+export interface VoiceOptionEntry {
+  engine: string;
+  engine_name: string;
+  voice: string;
+  voice_name: string;
+  reason: string;
+}
+
+export interface VoiceRecommendation extends VoiceOptionEntry {
+  source: 'ai' | 'rules';
+  model?: string | null;
+  note?: string;
+  genre: string;
+  tone: string;
+  speed: number;
+  style: string;
+  emotions: string[];
+  mode_hint: 'single' | 'scene' | 'theater';
+  alternatives: VoiceOptionEntry[];
+}
+
 export interface SynthesizeResult {
   ok: boolean;
   folder: string;

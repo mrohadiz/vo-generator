@@ -19,6 +19,7 @@ import type {
   SceneDraft,
   SynthesizeResult,
   TheaterScene,
+  VoiceRecommendation,
 } from './types';
 import { Header } from './components/Header';
 import { ProjectBar } from './components/ProjectBar';
@@ -28,6 +29,7 @@ import { ScenePanel } from './components/ScenePanel';
 import { TheaterPanel } from './components/TheaterPanel';
 import { EnginePanel } from './components/EnginePanel';
 import { ResultPanel } from './components/ResultPanel';
+import { RecommendPanel } from './components/RecommendPanel';
 import { QueuePanel } from './components/QueuePanel';
 import { HistoryPanel } from './components/HistoryPanel';
 import { Notice } from './components/ui';
@@ -102,6 +104,9 @@ export default function App() {
   const [resultFolder, setResultFolder] = useState('');
   const [warnings, setWarnings] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
+  const [recommendation, setRecommendation] = useState<VoiceRecommendation | null>(null);
+  const [recommending, setRecommending] = useState(false);
+  const [recommendError, setRecommendError] = useState<string | null>(null);
   const [etaText, setEtaText] = useState('');
   const etaTimer = useRef<number | null>(null);
   const [fetchingUrl, setFetchingUrl] = useState(false);
@@ -196,6 +201,50 @@ export default function App() {
       setAnalyzing(false);
     }
   }, [theaterRaw, useAi]);
+
+  /* ── Rekomendasi suara ─────────────────────────────────────────────── */
+
+  const narrativeText = useMemo(() => {
+    if (mode === 'single') return cleanedText;
+    if (mode === 'scene') return scenes.map((s) => s.cleaned_text).join('\n\n');
+    return theaterRaw;
+  }, [mode, cleanedText, scenes, theaterRaw]);
+
+  useEffect(() => {
+    setRecommendation(null);
+    setRecommendError(null);
+  }, [mode]);
+
+  const handleRecommend = useCallback(async () => {
+    if (!narrativeText.trim()) {
+      setFlash({ tone: 'warning', text: 'Isi dan bersihkan naskah dulu sebelum minta rekomendasi.' });
+      return;
+    }
+    setRecommending(true);
+    setRecommendError(null);
+    try {
+      const rec = await api.recommendVoice(narrativeText, true);
+      setRecommendation(rec);
+    } catch (e) {
+      setRecommendError((e as Error).message);
+    } finally {
+      setRecommending(false);
+    }
+  }, [narrativeText]);
+
+  const applyRecommendation = useCallback(
+    (entry: { engine: string; voice: string; speed: number; style: string }) => {
+      setEngineId(entry.engine as EngineId);
+      setVoiceId(entry.voice);
+      setSpeed(entry.speed);
+      setStyle(entry.style);
+      setFlash({
+        tone: 'info',
+        text: `Suara diganti ke ${entry.voice} · ${entry.speed.toFixed(2)}×.`,
+      });
+    },
+    [],
+  );
 
   /* ── Handler: teater ───────────────────────────────────────────────── */
 
@@ -535,6 +584,15 @@ export default function App() {
             ) : null}
           </aside>
         </div>
+
+        <RecommendPanel
+          rec={recommendation}
+          loading={recommending}
+          error={recommendError}
+          disabled={!narrativeText.trim()}
+          onRecommend={() => void handleRecommend()}
+          onApply={applyRecommendation}
+        />
 
         <ResultPanel
           result={result}

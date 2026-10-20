@@ -699,6 +699,23 @@ def api_annotate():
     return jsonify({"ok": True, "results": results})
 
 
+@app.route("/api/recommend_voice", methods=["POST"])
+def api_recommend_voice():
+    """Rekomendasi mesin + suara + kecepatan + gaya berdasarkan isi naskah (AI, cadangan aturan)."""
+    data = request.get_json(silent=True) or {}
+    text = cleaner.clean_text(cleaner.strip_directives(str(data.get("text", ""))))
+    if not text:
+        return jsonify({"ok": False, "message": "Naskah kosong; bersihkan teks dulu."}), 400
+    try:
+        rec = director.recommend_voice(text, use_ai=bool(data.get("use_ai", True)))
+        return jsonify({"ok": True, **rec})
+    except ValueError as e:
+        return jsonify({"ok": False, "message": str(e)}), 400
+    except Exception as e:
+        print(f"❌ Rekomendasi suara gagal: {e}", flush=True)
+        return jsonify({"ok": False, "message": str(e)}), 500
+
+
 @app.route("/api/direct", methods=["POST"])
 def api_direct():
     """Petakan cerita -> scene, tokoh, baris, dan usulan suara (AI, cadangan aturan generik)."""

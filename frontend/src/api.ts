@@ -11,6 +11,7 @@ import type {
   SceneDraft,
   StatusResponse,
   SynthesizeResult,
+  VoiceRecommendation,
 } from './types';
 
 export class ApiError extends Error {
@@ -80,6 +81,9 @@ export const api = {
   },
 
   direct: (text: string, useAi: boolean) => post<DirectResult>('/api/direct', { text, use_ai: useAi }),
+
+  recommendVoice: (text: string, useAi = true) =>
+    post<VoiceRecommendation>('/api/recommend_voice', { text, use_ai: useAi }),
 
   synthesize: (payload: Record<string, unknown>) => post<SynthesizeResult>('/api/synthesize', payload),
 

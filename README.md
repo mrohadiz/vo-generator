@@ -145,7 +145,11 @@ selesaikan satu cerita dalam satu sesi. Bila gagal, baris otomatis dibacakan Sup
 6. **Coba suara**: panel kanan punya tombol *Coba suara <nama>* untuk mendengarkan contoh tiap suara sebelum
    men-generate. Pocket-TTS memakai berkas referensi; Supertonic dan Gemini disintesis sekali lalu di-cache di
    `output/_voice_samples/` (*Buat ulang* untuk menyegarkan).
-7. **Hapus hasil**: di panel *Riwayat produksi*, tiap berkas punya tombol *Hapus*, dan tiap folder punya *Hapus
+7. **Rekomendasi suara**: setelah teks dibersihkan, klik *Minta rekomendasi* di kartu *Rekomendasi suara*. AI membaca
+   naskah lalu menyarankan satu suara utama beserta kecepatan, gaya bacaan (Gemini), emosi dominan, alasan, dan dua
+   alternatif. Tombol *Pakai suara ini* langsung mengganti mesin/suara/kecepatan/gaya. Bila AI tidak tersedia, dipakai
+   aturan kata kunci (genre, suasana, panjang dialog) dan kartu menandainya *Aturan kata kunci*.
+8. **Hapus hasil**: di panel *Riwayat produksi*, tiap berkas punya tombol *Hapus*, dan tiap folder punya *Hapus
    folder* (menghapus semua scene di dalamnya). Ada konfirmasi sebelum dihapus, dan tidak bisa dibatalkan. Folder
    kosong ikut dibersihkan otomatis. Akses dibatasi pada `output/` (nama berkas tidak boleh keluar folder).
 
@@ -208,6 +212,7 @@ output/              Hasil audio (tidak ikut git)
 | `POST /api/fetch_url` | `{url}` → judul dan isi artikel (lewat Jina Reader) |
 | `POST /api/clean_scenes` | `{text, group_words?}` → daftar scene bersih |
 | `POST /api/annotate` | `{texts[], use_ai}` → teks berpenanda `[emosi]`/`[jeda]` |
+| `POST /api/recommend_voice` | `{text, use_ai}` → mesin, suara, kecepatan, gaya, alasan, alternatif |
 | `POST /api/direct` | `{text, use_ai}` → scene, tokoh, baris, usulan suara |
 | `POST /api/synthesize` | `{engine, text, voice, speed, style?, title, scene?}` atau `{lines[], title, scene}` → WAV |
 | `POST /api/queue/enqueue` | Payload sama dengan `/api/synthesize` → `{ok, job_id, position}` |
@@ -225,7 +230,8 @@ output/              Hasil audio (tidak ikut git)
 ## Privasi dan keamanan
 
 - **Dikirim ke luar**: teks naskah ke Google (Gemini TTS, juga lewat OmniRoute), ke gateway/penyedia model AI (Analisis
-  Cerita, Petakan Ekspresi), ke Space Hugging Face (Drama 3), dan alamat halaman ke r.jina.ai (ambil dari URL).
+  Cerita, Petakan Ekspresi, Rekomendasi Suara), ke Space Hugging Face (Drama 3), dan alamat halaman ke r.jina.ai
+  (ambil dari URL).
   Untuk naskah sensitif, pakai Supertonic atau Pocket-TTS dan matikan "Pakai AI".
 - **Rahasia** hanya di `.env` (tidak dilacak git; contoh di `.env.example`). Jangan menempel token di chat atau kode.
 - Server terbuka di semua antarmuka dan **tanpa autentikasi**: siapa pun di jaringan yang sama bisa memakai fitur AI

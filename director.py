@@ -405,6 +405,243 @@ def annotate(text: str, use_ai: bool = True) -> dict:
     return {"text": render_annotated(segs), "segments": segs, "info": info}
 
 
+# --- Rekomendasi suara -------------------------------------------------------
+
+VOICE_CATALOG = {
+    "supertonic": {
+        "M1": {"label": "M1 - Pria (Standar Narator)", "gender": "pria",
+               "karakter": "netral, jelas, tenang", "cocok": "narasi umum, dokumenter, berita ringan"},
+        "M2": {"label": "M2 - Pria (Santai)", "gender": "pria",
+               "karakter": "santai dan akrab", "cocok": "cerita ringan, vlog, edukasi santai"},
+        "M3": {"label": "M3 - Pria (Berat & Dalam)", "gender": "pria",
+               "karakter": "berat, dalam, berwibawa", "cocok": "misteri, horor, epik, trailer"},
+        "M4": {"label": "M4 - Pria (Resmi / Berita)", "gender": "pria",
+               "karakter": "resmi dan tegas", "cocok": "berita, pengumuman, korporat"},
+        "M5": {"label": "M5 - Pria (Hangat)", "gender": "pria",
+               "karakter": "hangat dan ramah, seperti ayah bercerita", "cocok": "dongeng, motivasi, cerita keluarga"},
+        "F1": {"label": "F1 - Wanita (Jelas / Presenter)", "gender": "wanita",
+               "karakter": "jelas dan tegas seperti presenter", "cocok": "dokumenter, edukasi, presentasi"},
+        "F2": {"label": "F2 - Wanita (Lembut)", "gender": "wanita",
+               "karakter": "lembut dan menenangkan", "cocok": "dongeng anak, meditasi, cerita hangat"},
+        "F3": {"label": "F3 - Wanita (Ceria)", "gender": "wanita",
+               "karakter": "ceria dan ringan", "cocok": "konten anak, hiburan, iklan ringan"},
+        "F4": {"label": "F4 - Wanita (Formal)", "gender": "wanita",
+               "karakter": "formal dan rapi", "cocok": "korporat, berita, instruksional"},
+        "F5": {"label": "F5 - Wanita (Ekspresif)", "gender": "wanita",
+               "karakter": "ekspresif dan dramatis", "cocok": "audio drama, cerita emosional, teater"},
+    },
+    "gemini_tts": {
+        "Zubenelgenubi": {"label": "Zubenelgenubi - Santai, nada menengah-rendah", "gender": "netral",
+                          "karakter": "santai, mengalir, tidak berlebihan", "cocok": "storytelling umum, narasi panjang"},
+        "Zali": {"label": "Zali - Hangat dan empatik", "gender": "netral",
+                 "karakter": "hangat dan empatik", "cocok": "cerita haru, motivasi, dongeng"},
+        "Riko": {"label": "Riko - Percaya diri dan jelas", "gender": "netral",
+                 "karakter": "percaya diri, jelas, nada dalam", "cocok": "dokumenter, iklan, narasi tegas"},
+        "Sami": {"label": "Sami - Tenang dan yakin", "gender": "netral",
+                 "karakter": "tenang dan yakin, nada rendah", "cocok": "misteri, refleksi, meditasi"},
+        "Enzo": {"label": "Enzo - Tajam dan bersemangat", "gender": "netral",
+                 "karakter": "tajam dan bersemangat, nada rendah", "cocok": "aksi, trailer, pengumuman energik"},
+        "Achird": {"label": "Achird - Ramah", "gender": "netral",
+                   "karakter": "ramah, nada menengah-rendah", "cocok": "edukasi, cerita santai"},
+        "Kore": {"label": "Kore - Tegas", "gender": "netral",
+                 "karakter": "tegas", "cocok": "instruksi, berita, otoritas"},
+        "Puck": {"label": "Puck - Ceria", "gender": "netral",
+                 "karakter": "ceria", "cocok": "anak, hiburan, iklan ceria"},
+        "Charon": {"label": "Charon - Informatif", "gender": "netral",
+                   "karakter": "informatif", "cocok": "penjelasan, sains, tutorial"},
+        "Aoede": {"label": "Aoede - Ringan, mengalir", "gender": "netral",
+                  "karakter": "ringan dan mengalir", "cocok": "puisi, narasi artistik, ASMR"},
+    },
+}
+
+ENGINE_LABEL = {"supertonic": "Supertonic", "gemini_tts": "Gemini TTS"}
+
+RECOMMEND_SYSTEM = """Kamu adalah pengarah suara (voice director) untuk narasi audio bahasa Indonesia.
+Baca naskah yang diberikan, lalu pilih SATU suara paling cocok dari katalog dan usulkan dua alternatif.
+
+ATURAN:
+- engine hanya boleh "supertonic" atau "gemini_tts"; voice harus id persis dari katalog itu.
+- Pilih berdasarkan suasana, genre, dan siapa pendengarnya, bukan berdasarkan panjang naskah.
+- speed: angka 0.85 sampai 1.10 (0.9-0.97 untuk cerita reflektif, 1.0 untuk narasi umum, 1.03-1.08 untuk ceria/energik).
+- style: hanya untuk gemini_tts; satu kalimat bahasa Inggris yang mendeskripsikan gaya bacaan (contoh: "warm, unhurried bedtime storytelling, gentle and intimate").
+- reason: 2-3 kalimat bahasa Indonesia yang menjelaskan kenapa suara itu cocok dengan cerita ini, sebutkan bukti dari isi naskah.
+- emotions: 2-5 emosi dominan, hanya dari: netral, senang, sedih, marah, takut, kaget, berbisik, tegas, lembut, licik, menggoda.
+- mode_hint: "single" bila naskah satu alur naratif, "scene" bila ada banyak pergantian suasana, "theater" bila banyak dialog tokoh.
+- Keluaran HANYA JSON valid tanpa teks lain, bentuk:
+{"genre":"...","tone":"...","engine":"...","voice":"...","speed":1.0,"style":"...","reason":"...",
+ "emotions":["..."],"mode_hint":"single","alternatives":[{"engine":"...","voice":"...","reason":"..."}]}"""
+
+
+def _catalog_prompt() -> str:
+    lines = []
+    for engine, voices in VOICE_CATALOG.items():
+        lines.append(f"[{engine}]")
+        for vid, meta in voices.items():
+            lines.append(f"- {vid}: {meta['label']} — {meta['karakter']}; cocok untuk {meta['cocok']}")
+    return "\n".join(lines)
+
+
+def _recommendation_entry(engine: str, voice: str, reason: str = "") -> dict:
+    meta = VOICE_CATALOG[engine][voice]
+    return {
+        "engine": engine,
+        "engine_name": ENGINE_LABEL[engine],
+        "voice": voice,
+        "voice_name": meta["label"],
+        "reason": reason.strip(),
+    }
+
+
+def _validate_recommendation(data: dict) -> dict:
+    """Pastikan mesin/suara benar-benar ada dan nilai numerik masuk akal; lengkapi yang kosong."""
+    engine = str(data.get("engine", "")).strip()
+    if engine not in VOICE_CATALOG:
+        engine = "supertonic"
+    voices = VOICE_CATALOG[engine]
+    voice = str(data.get("voice", "")).strip()
+    if voice not in voices:
+        voice = next(iter(voices))
+
+    try:
+        speed = float(data.get("speed", 1.0))
+    except (TypeError, ValueError):
+        speed = 1.0
+    speed = round(min(1.2, max(0.85, speed)), 2)
+
+    style = str(data.get("style", "")).strip() if engine == "gemini_tts" else ""
+
+    emotions = []
+    for e in data.get("emotions") or []:
+        e = str(e).strip().lower()
+        if e in cleaner.EMOTIONS and e not in emotions:
+            emotions.append(e)
+    if not emotions:
+        emotions = ["lembut"]
+
+    mode_hint = str(data.get("mode_hint", "single")).strip().lower()
+    if mode_hint not in ("single", "scene", "theater"):
+        mode_hint = "single"
+
+    alternatives = []
+    for alt in data.get("alternatives") or []:
+        a_engine = str(alt.get("engine", "")).strip()
+        a_voice = str(alt.get("voice", "")).strip()
+        if a_engine in VOICE_CATALOG and a_voice in VOICE_CATALOG[a_engine]:
+            entry = _recommendation_entry(a_engine, a_voice, str(alt.get("reason", "")))
+            if (entry["engine"], entry["voice"]) != (engine, voice):
+                alternatives.append(entry)
+        if len(alternatives) >= 3:
+            break
+
+    main = _recommendation_entry(engine, voice, str(data.get("reason", "")))
+    return {
+        **main,
+        "genre": str(data.get("genre", "")).strip() or "narasi",
+        "tone": str(data.get("tone", "")).strip() or "netral",
+        "speed": speed,
+        "style": style,
+        "emotions": emotions,
+        "mode_hint": mode_hint,
+        "alternatives": alternatives,
+    }
+
+
+# Kata kunci untuk jalur tanpa AI. Urutan = prioritas bila skornya sama.
+_RULES = [
+    ("horor / misteri", "supertonic", "M3", 0.94, "",
+     r"hantu|misteri|gelap|darah|kematian|kubur|bisikan|kutukan|seram|menakutkan|kabut|bayangan|sunyi|mencekam"),
+    ("dongeng / fantasi", "supertonic", "F2", 0.96, "",
+     r"dongeng|peri|bintang|ajaib|sihir|lentera|kerajaan|putri|peri|desa|kakek|nenek|cerita"),
+    ("berita / informatif", "supertonic", "M4", 1.0, "",
+     r"menurut|data|penelitian|persen|laporan|pemerintah|kebijakan|studi|analisis|fakta"),
+    ("motivasi / hangat", "supertonic", "M5", 0.98, "",
+     r"harapan|bermimpi|percaya|semangat|syukur|cinta|bahagia|bangkit|berani"),
+    ("drama / emosional", "supertonic", "F5", 0.95, "",
+     r"menangis|air mata|sedih|kehilangan|rindu|peluk|perpisahan|duka|gemetar"),
+    ("santai / edukasi", "supertonic", "M2", 1.0, "",
+     r"tips|cara|langkah|mudah|santai|ngobrol|kita|kamu|sehari-hari"),
+]
+
+_EMOTION_HINTS = {
+    "sedih": r"sedih|menangis|air mata|kehilangan|rindu|duka",
+    "takut": r"takut|cemas|gemetar|seram|mencekam|kabut|gelap",
+    "senang": r"senang|bahagia|tawa|ceria|syukur|hangat",
+    "tegas": r"harus|wajib|jangan|penting|peringatan",
+    "lembut": r"bisik|lembut|pelan|sayang|peluk",
+}
+
+
+def _recommend_rules(text: str) -> dict:
+    """Rekomendasi tanpa AI: hitung kata kunci suasana, pilih suara dari peta aturan."""
+    low = text.lower()
+    best = None
+    for genre, engine, voice, speed, style, pattern in _RULES:
+        score = len(re.findall(pattern, low))
+        if best is None or score > best[0]:
+            best = (score, genre, engine, voice, speed, style)
+
+    score, genre, engine, voice, speed, style = best or (0, "narasi umum", "supertonic", "M1", 1.0, "")
+    if score == 0:
+        genre, voice, speed = "narasi umum", "M1", 1.0
+
+    emotions = []
+    for emo, pattern in _EMOTION_HINTS.items():
+        if len(re.findall(pattern, low)) >= 2:
+            emotions.append(emo)
+    emotions = emotions[:4] or ["lembut"]
+
+    quotes = len(re.findall(r"[\"“”']", text)) // 2
+    paragraphs = len([p for p in re.split(r"\n\s*\n", text) if p.strip()])
+    mode_hint = "theater" if quotes >= 6 else "scene" if paragraphs >= 4 else "single"
+
+    meta = VOICE_CATALOG[engine][voice]
+    reason = (
+        f"Naskah terasa seperti {genre.lower()}. {meta['label']} dipilih karena {meta['karakter']}, "
+        f"cocok untuk {meta['cocok']}. Kecepatan {speed:.2f}× menjaga cerita tetap mengalir."
+    )
+    return {
+        **_recommendation_entry(engine, voice, reason),
+        "genre": genre,
+        "tone": ", ".join(emotions),
+        "speed": speed,
+        "style": style,
+        "emotions": emotions,
+        "mode_hint": mode_hint,
+        "alternatives": [
+            _recommendation_entry("supertonic", "M5", "Alternatif hangat bila ingin kesan seperti ayah bercerita."),
+            _recommendation_entry("gemini_tts", "Zubenelgenubi", "Alternatif cloud yang santai untuk narasi panjang."),
+        ],
+    }
+
+
+def recommend_voice(text: str, use_ai: bool = True) -> dict:
+    """Rekomendasikan mesin + suara + kecepatan + gaya berdasarkan isi naskah."""
+    text = (text or "").strip()
+    if not text:
+        raise ValueError("Naskah kosong; isi dan bersihkan teks dulu.")
+
+    errors = []
+    providers = ai_config() if use_ai else None
+    if use_ai and providers is None:
+        errors.append("AI belum dikonfigurasi")
+    if providers:
+        user = "Katalog suara:\n" + _catalog_prompt() + "\n\nNaskah:\n" + text[:6000]
+        for cfg, model in [(p, m) for p in providers for m in p["models"]]:
+            try:
+                data = _parse_json(_chat(cfg, model, RECOMMEND_SYSTEM, user, timeout=90))
+                rec = _validate_recommendation(data)
+                rec.update(source="ai", model=f"{cfg['name']}/{model}", note="")
+                return rec
+            except Exception as e:
+                errors.append(f"{cfg['name']}/{model}: {str(e)[:90]}")
+
+    rec = _recommend_rules(text)
+    rec.update(source="rules", model=None,
+               note="Rekomendasi dari kata kunci naskah." + (
+                   " AI tidak terpakai: " + " | ".join(errors[:2]) if errors else ""))
+    return rec
+
+
 # --- Penetapan suara --------------------------------------------------------
 
 SUPERTONIC_FEMALE = ["F2", "F1", "F4", "F5", "F3"]
