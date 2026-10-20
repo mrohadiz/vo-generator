@@ -1,4 +1,6 @@
+import { useRef, useState } from 'react';
 import { Button } from '@fieldnote-ui/ui';
+import { api } from '../api';
 import type { Engine, EngineId } from '../types';
 import { Card, Field, Notice } from './ui';
 
@@ -37,6 +39,28 @@ export function EnginePanel({
 }) {
   const engine = engines.find((e) => e.id === engineId);
   const voices = engine?.voices ?? [];
+
+  /** Sampel suara: Pocket-TTS memakai referensi, mesin lain disintesis sekali lalu di-cache. */
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [sampling, setSampling] = useState(false);
+  const [sampleError, setSampleError] = useState<string | null>(null);
+
+  async function playSample(refresh = false) {
+    if (!voiceId || sampling) return;
+    setSampling(true);
+    setSampleError(null);
+    try {
+      const data = await api.voiceSample(engineId, voiceId, refresh);
+      const audio = audioRef.current ?? new Audio();
+      audioRef.current = audio;
+      audio.src = `${data.audio_url}${data.cached ? '' : `?t=${Date.now()}`}`;
+      await audio.play();
+    } catch (e) {
+      setSampleError((e as Error).message);
+    } finally {
+      setSampling(false);
+    }
+  }
 
   return (
     <Card title="Mesin suara">
@@ -87,7 +111,7 @@ export function EnginePanel({
           </Field>
         ) : null}
 
-        <Field label="Suara" htmlFor="voice-select">
+        <Field label="Suara" htmlFor="voice-select" hint="Dengarkan contoh sebelum menambahkan ke antrian.">
           <select
             id="voice-select"
             className="fn-select"
@@ -103,6 +127,31 @@ export function EnginePanel({
           </select>
         </Field>
 
+        {voices.length > 0 ? (
+          <div className="fn-row" style={{ gap: 'var(--fn-space-2)' }}>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => void playSample(false)}
+              disabled={!voiceId || sampling || busy}
+            >
+              {sampling
+                ? 'Menyiapkan sampel…'
+                : `Coba suara ${(voices.find((v) => v.id === voiceId)?.name ?? '').split(' - ')[0]}`.trim()}
+            </Button>
+            <button
+              type="button"
+              className="fn-button fn-button--ghost fn-button--sm"
+              onClick={() => void playSample(true)}
+              disabled={!voiceId || sampling || busy}
+              title="Buat ulang sampel (abaikan cache)"
+            >
+              Buat ulang
+            </button>
+          </div>
+        ) : null}
+
+        {sampleError ? <Notice tone="danger">{sampleError}</Notice> : null}
         {notice ? <Notice tone={notice.tone}>{notice.text}</Notice> : null}
 
         <div className="fn-stack" style={{ gap: 'var(--fn-space-2)', marginTop: 'var(--fn-space-2)' }}>

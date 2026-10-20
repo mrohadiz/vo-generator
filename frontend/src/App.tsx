@@ -549,6 +549,7 @@ export default function App() {
           error={queue.error}
           onRefresh={queue.refresh}
           onCancel={(id) => void queue.cancel(id)}
+          onRemove={(id) => void queue.remove(id)}
           onClearDone={() => void queue.clearDone()}
         />
 

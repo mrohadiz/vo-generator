@@ -94,7 +94,37 @@ export const api = {
 
   cancelJob: (id: string) => post<{ ok: boolean; message?: string }>(`/api/queue/cancel/${id}`, {}),
 
+  removeJob: (id: string) => post<{ ok: boolean; message?: string }>(`/api/queue/remove/${id}`, {}),
+
   history: () => get<HistoryResponse>('/api/history'),
+
+  /** Sampel singkat: Pocket-TTS memakai referensi, mesin lain disintesis lalu di-cache. */
+  voiceSample: (engine: string, voice: string, refresh = false) =>
+    post<{ ok: boolean; audio_url: string; cached?: boolean; message?: string }>('/api/voice_sample', {
+      engine,
+      voice,
+      refresh,
+    }),
+
+  /** Hapus satu berkas hasil. `url` berbentuk /output/<folder>/<berkas>.wav */
+  deleteFile: async (url: string): Promise<void> => {
+    const rel = url.replace(/^\/output\//, '').replace(/^\/+/, '');
+    await parse<{ ok: boolean }>(
+      await fetch(`/api/history/file/${rel.split('/').map(encodeURIComponent).join('/')}`, {
+        method: 'DELETE',
+        headers: { Accept: 'application/json' },
+      }),
+    );
+  },
+
+  deleteFolder: async (folder: string): Promise<void> => {
+    await parse<{ ok: boolean }>(
+      await fetch(`/api/history/folder/${encodeURIComponent(folder)}`, {
+        method: 'DELETE',
+        headers: { Accept: 'application/json' },
+      }),
+    );
+  },
 
   sampleUrl: (voiceId: string) => `/api/sample/${encodeURIComponent(voiceId)}`,
   zipUrl: (folder: string) => `/api/zip/${encodeURIComponent(folder)}`,

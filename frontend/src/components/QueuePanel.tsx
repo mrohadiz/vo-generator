@@ -25,6 +25,7 @@ export function QueuePanel({
   error,
   onRefresh,
   onCancel,
+  onRemove,
   onClearDone,
 }: {
   items: QueueJob[];
@@ -32,6 +33,7 @@ export function QueuePanel({
   error: string | null;
   onRefresh: () => void;
   onCancel: (id: string) => void;
+  onRemove: (id: string) => void;
   onClearDone: () => void;
 }) {
   return (
@@ -87,7 +89,7 @@ export function QueuePanel({
                     {job.finished_at ? <div>Selesai: {fmtDate(job.finished_at)}</div> : null}
                   </td>
                   <td>
-                    <JobActions job={job} onCancel={onCancel} />
+                    <JobActions job={job} onCancel={onCancel} onRemove={onRemove} />
                   </td>
                 </tr>
               ))}
@@ -99,12 +101,34 @@ export function QueuePanel({
   );
 }
 
-function JobActions({ job, onCancel }: { job: QueueJob; onCancel: (id: string) => void }) {
+function JobActions({
+  job,
+  onCancel,
+  onRemove,
+}: {
+  job: QueueJob;
+  onCancel: (id: string) => void;
+  onRemove: (id: string) => void;
+}) {
+  const removeButton = (
+    <button
+      type="button"
+      className="fn-button fn-button--ghost fn-button--sm"
+      style={{ color: 'var(--fn-color-danger-text)' }}
+      onClick={() => onRemove(job.id)}
+      title="Hapus catatan job ini (berkas audio tetap ada)"
+    >
+      Hapus
+    </button>
+  );
+
   if (job.status === 'queued') {
     return (
-      <Button variant="ghost" size="sm" onClick={() => onCancel(job.id)}>
-        Batalkan
-      </Button>
+      <div className="fn-row" style={{ gap: 'var(--fn-space-2)' }}>
+        <Button variant="ghost" size="sm" onClick={() => onCancel(job.id)}>
+          Batalkan
+        </Button>
+      </div>
     );
   }
   if (job.status === 'running') return <span className="fn-meta">Sedang berjalan…</span>;
@@ -119,8 +143,9 @@ function JobActions({ job, onCancel }: { job: QueueJob; onCancel: (id: string) =
         <a className="fn-button fn-button--ghost fn-button--sm" href={url} target="_blank" rel="noopener noreferrer">
           Putar
         </a>
+        {removeButton}
       </div>
     );
   }
-  return <span className="fn-meta">-</span>;
+  return <div className="fn-row">{removeButton}</div>;
 }

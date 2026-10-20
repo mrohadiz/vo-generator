@@ -89,12 +89,20 @@ export function useQueue(intervalMs = 3000) {
     [refresh],
   );
 
+  const remove = useCallback(
+    async (id: string) => {
+      await api.removeJob(id);
+      await refresh();
+    },
+    [refresh],
+  );
+
   const clearDone = useCallback(async () => {
     await api.clearDone();
     await refresh();
   }, [refresh]);
 
-  return { items, queued, error, refresh, cancel, clearDone };
+  return { items, queued, error, refresh, cancel, remove, clearDone };
 }
 
 export function useHistory() {

@@ -17,6 +17,33 @@ export function HistoryPanel({
 }) {
   const { files, folders } = data;
 
+  async function removeFile(url: string, name?: string) {
+    const label = name ?? url.split('/').pop() ?? 'berkas ini';
+    if (!window.confirm(`Hapus "${label}"?\n\nBerkas dihapus permanen dari folder output.`)) return;
+    try {
+      await api.deleteFile(url);
+      onRefresh();
+    } catch (e) {
+      window.alert((e as Error).message);
+    }
+  }
+
+  async function removeFolder(folder: string, count: number) {
+    if (
+      !window.confirm(
+        `Hapus folder "${folder}" beserta ${count} berkas di dalamnya?\n\nTindakan ini tidak bisa dibatalkan.`,
+      )
+    ) {
+      return;
+    }
+    try {
+      await api.deleteFolder(folder);
+      onRefresh();
+    } catch (e) {
+      window.alert((e as Error).message);
+    }
+  }
+
   return (
     <Card
       id="history-panel"
@@ -45,17 +72,36 @@ export function HistoryPanel({
                       {folder.count} berkas · {folder.time}
                     </span>
                   </span>
-                  <a
-                    className="fn-button fn-button--secondary fn-button--sm"
-                    href={api.zipUrl(folder.folder)}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    Unduh ZIP
-                  </a>
+                  <span className="fn-row" style={{ gap: 'var(--fn-space-2)' }}>
+                    <a
+                      className="fn-button fn-button--secondary fn-button--sm"
+                      href={api.zipUrl(folder.folder)}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Unduh ZIP
+                    </a>
+                    <button
+                      type="button"
+                      className="fn-button fn-button--ghost fn-button--sm"
+                      style={{ color: 'var(--fn-color-danger-text)' }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        void removeFolder(folder.folder, folder.count);
+                      }}
+                    >
+                      Hapus folder
+                    </button>
+                  </span>
                 </summary>
                 <div className="fn-stack mt-3" style={{ gap: 'var(--fn-space-2)' }}>
                   {folder.files.map((file) => (
-                    <AudioRow key={file.url} url={file.url} name={file.name} />
+                    <AudioRow
+                      key={file.url}
+                      url={file.url}
+                      name={file.name}
+                      onDelete={() => void removeFile(file.url, file.name)}
+                    />
                   ))}
                 </div>
               </details>
@@ -98,6 +144,14 @@ export function HistoryPanel({
                         >
                           Putar
                         </a>
+                        <button
+                          type="button"
+                          className="fn-button fn-button--ghost fn-button--sm"
+                          style={{ color: 'var(--fn-color-danger-text)' }}
+                          onClick={() => void removeFile(file.url, file.filename)}
+                        >
+                          Hapus
+                        </button>
                       </div>
                     </td>
                   </tr>

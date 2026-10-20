@@ -66,8 +66,8 @@ export function Notice({
   );
 }
 
-/** Baris audio: pemutar langsung, unduh, dan buka di tab terpisah. */
-export function AudioRow({ url, name }: { url: string; name?: string }) {
+/** Baris audio: pemutar langsung, unduh, buka di tab terpisah, dan hapus. */
+export function AudioRow({ url, name, onDelete }: { url: string; name?: string; onDelete?: () => void }) {
   return (
     <div className="fn-audio-row">
       <audio controls preload="none" src={url} />
@@ -78,6 +78,16 @@ export function AudioRow({ url, name }: { url: string; name?: string }) {
       <a className="fn-button fn-button--ghost fn-button--sm" href={url} target="_blank" rel="noopener noreferrer">
         Putar terpisah
       </a>
+      {onDelete ? (
+        <button
+          type="button"
+          className="fn-button fn-button--ghost fn-button--sm"
+          style={{ color: 'var(--fn-color-danger-text)' }}
+          onClick={onDelete}
+        >
+          Hapus
+        </button>
+      ) : null}
     </div>
   );
 }

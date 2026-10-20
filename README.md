@@ -140,7 +140,14 @@ selesaikan satu cerita dalam satu sesi. Bila gagal, baris otomatis dibacakan Sup
 5. **Antrian**: setiap klik *Tambah ke antrian* membuat satu job (mode scene/teater: satu job per scene). Panel
    *Antrian generate* memperbarui status tiap 3 detik: Menunggu → Diproses → Selesai/Gagal. Job yang masih menunggu
    bisa dibatalkan; hasil yang selesai bisa langsung diputar, diunduh, atau dibuka di tab terpisah. Satu pekerja
-   memproses satu job pada satu waktu, jadi aman untuk menyiapkan banyak naskah sekaligus.
+   memproses satu job pada satu waktu, jadi aman untuk menyiapkan banyak naskah sekaligus. Tombol *Hapus* pada
+   baris selesai hanya membuang catatan job (berkas tetap ada).
+6. **Coba suara**: panel kanan punya tombol *Coba suara <nama>* untuk mendengarkan contoh tiap suara sebelum
+   men-generate. Pocket-TTS memakai berkas referensi; Supertonic dan Gemini disintesis sekali lalu di-cache di
+   `output/_voice_samples/` (*Buat ulang* untuk menyegarkan).
+7. **Hapus hasil**: di panel *Riwayat produksi*, tiap berkas punya tombol *Hapus*, dan tiap folder punya *Hapus
+   folder* (menghapus semua scene di dalamnya). Ada konfirmasi sebelum dihapus, dan tidak bisa dibatalkan. Folder
+   kosong ikut dibersihkan otomatis. Akses dibatasi pada `output/` (nama berkas tidak boleh keluar folder).
 
 ## Format naskah
 
@@ -195,7 +202,8 @@ output/              Hasil audio (tidak ikut git)
 |---|---|
 | `GET /api/status` | Kesiapan tiap mesin |
 | `GET /api/options` | Daftar mesin dan suara |
-| `GET /api/sample/<voice_id>` | Putar sampel suara Pocket-TTS |
+| `GET /api/sample/<voice_id>` | Sampel referensi Pocket-TTS |
+| `POST /api/voice_sample` | `{engine, voice, refresh?}` → sampel singkat semua mesin (di-cache di `output/_voice_samples/`) |
 | `POST /api/clean` | `{text}` → teks bersih, statistik, segmen, peringatan |
 | `POST /api/fetch_url` | `{url}` → judul dan isi artikel (lewat Jina Reader) |
 | `POST /api/clean_scenes` | `{text, group_words?}` → daftar scene bersih |
@@ -206,9 +214,12 @@ output/              Hasil audio (tidak ikut git)
 | `GET /api/queue/list` | Daftar job antrian + jumlah yang menunggu |
 | `GET /api/queue/jobs/<id>` | Status satu job |
 | `POST /api/queue/cancel/<id>` | Batalkan job yang masih menunggu |
+| `POST /api/queue/remove/<id>` | Hapus satu catatan job yang sudah selesai (berkas tetap ada) |
 | `POST /api/queue/clear_done` | Hapus job selesai/gagal/dibatalkan dari riwayat |
 | `GET /api/zip/<folder>` | ZIP seluruh scene dalam folder |
 | `GET /api/history` | Audio terbaru dan folder scene |
+| `DELETE /api/history/file/<path>` | Hapus satu berkas `.wav` di `output/` |
+| `DELETE /api/history/folder/<folder>` | Hapus satu folder hasil beserta seluruh isinya |
 | `GET /output/<path>` | Berkas hasil |
 
 ## Privasi dan keamanan

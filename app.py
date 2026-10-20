@@ -14,6 +14,7 @@ import datetime
 import threading
 import queue
 import uuid
+import shutil
 from copy import deepcopy
 import numpy as np
 import soundfile as sf
@@ -247,6 +248,71 @@ def api_sample(voice_id):
         if v["id"] == voice_id:
             return send_file(v["path"])
     return jsonify({"error": "Sampel tidak ditemukan"}), 404
+
+
+# --- Sampel suara untuk semua mesin ---------------------------------------
+VOICE_SAMPLE_DIR = os.path.join(OUTPUT_DIR, "_voice_samples")
+VOICE_SAMPLE_TEXT = (
+    "Halo, ini contoh suara narasi bahasa Indonesia. "
+    "Semoga hari Anda menyenangkan dan penuh cerita."
+)
+
+
+@app.route("/api/voice_sample", methods=["POST"])
+def api_voice_sample():
+    """
+    Sampel singkat untuk suara mana pun. Pocket-TTS memakai berkas referensi;
+    Supertonic dan Gemini disintesis sekali lalu di-cache di output/_voice_samples/.
+    """
+    data = request.get_json(silent=True) or {}
+    engine = str(data.get("engine", "")).strip()
+    voice_id = str(data.get("voice", "")).strip()
+    if not engine or not voice_id:
+        return jsonify({"ok": False, "message": "Mesin dan suara wajib diisi."}), 400
+
+    if engine == "pocket_tts":
+        if any(v["id"] == voice_id for v in get_pocket_voices()):
+            return jsonify({"ok": True, "audio_url": f"/api/sample/{voice_id}", "cached": True})
+        return jsonify({"ok": False, "message": "Sampel suara tidak ditemukan."}), 404
+
+    if engine == "drama3":
+        return jsonify({
+            "ok": False,
+            "message": "Drama 3 memakai deskripsi tokoh; coba suara dari kartu tokoh di mode teater.",
+        }), 400
+
+    if engine not in ("supertonic", "gemini_tts", "gemini_gw"):
+        return jsonify({"ok": False, "message": f"Mesin '{engine}' tidak dikenal."}), 400
+
+    os.makedirs(VOICE_SAMPLE_DIR, exist_ok=True)
+    name = f"{engine}_{_safe_name(voice_id, 24) or 'voice'}.wav"
+    path = os.path.join(VOICE_SAMPLE_DIR, name)
+    cached = os.path.isfile(path) and not bool(data.get("refresh"))
+
+    if not cached:
+        if not lock_sintesis.acquire(blocking=False):
+            if os.path.isfile(path):                 # sedang sibuk: pakai cache lama
+                cached = True
+            else:
+                return jsonify({
+                    "ok": False,
+                    "message": "Mesin sedang membuat audio lain. Coba lagi setelah selesai.",
+                }), 409
+        else:
+            try:
+                wav, sr = synthesize_text(engine, VOICE_SAMPLE_TEXT, voice_id, 1.0)
+                sf.write(path, wav, sr)
+            except Exception as e:
+                print(f"❌ Sampel suara gagal ({engine}/{voice_id}): {e}", flush=True)
+                return jsonify({"ok": False, "message": str(e)}), 500
+            finally:
+                lock_sintesis.release()
+
+    return jsonify({
+        "ok": True,
+        "audio_url": f"/output/_voice_samples/{name}",
+        "cached": cached,
+    })
 
 
 @app.route("/api/clean", methods=["POST"])
@@ -847,6 +913,49 @@ def api_history():
     return jsonify({"files": files[:25], "folders": folders[:15]})
 
 
+# --- Hapus hasil -----------------------------------------------------------
+
+def _safe_output_path(rel: str):
+    """Path absolut di dalam OUTPUT_DIR, atau None bila keluar folder (anti path traversal)."""
+    root = os.path.realpath(OUTPUT_DIR)
+    target = os.path.realpath(os.path.join(root, rel))
+    if target == root or not target.startswith(root + os.sep):
+        return None
+    return target
+
+
+@app.route("/api/history/file/<path:filename>", methods=["DELETE"])
+def api_delete_file(filename):
+    """Hapus satu berkas hasil (hanya .wav) di dalam output/."""
+    if not filename.lower().endswith(".wav"):
+        return jsonify({"ok": False, "message": "Hanya berkas .wav yang bisa dihapus."}), 400
+    target = _safe_output_path(filename)
+    if target is None or not os.path.isfile(target):
+        return jsonify({"ok": False, "message": "Berkas tidak ditemukan."}), 404
+    os.remove(target)
+    parent = os.path.dirname(target)
+    if parent != os.path.realpath(OUTPUT_DIR):
+        try:
+            if not os.listdir(parent):              # folder scene jadi kosong → ikut dibersihkan
+                os.rmdir(parent)
+        except OSError:
+            pass
+    return jsonify({"ok": True})
+
+
+@app.route("/api/history/folder/<folder>", methods=["DELETE"])
+def api_delete_folder(folder):
+    """Hapus satu folder hasil beserta seluruh scene di dalamnya."""
+    name = _safe_name(folder, 80)
+    if not name or name.startswith("_"):
+        return jsonify({"ok": False, "message": "Folder tidak valid."}), 400
+    target = _safe_output_path(name)
+    if target is None or not os.path.isdir(target):
+        return jsonify({"ok": False, "message": "Folder tidak ditemukan."}), 404
+    shutil.rmtree(target)
+    return jsonify({"ok": True, "deleted": name})
+
+
 # --- Antrian: pekerja tunggal + endpoint -----------------------------------
 
 
@@ -972,6 +1081,19 @@ def api_queue_cancel(jid):
         if job["status"] != "queued":
             return jsonify({"ok": False, "message": "Hanya job yang masih menunggu bisa dibatalkan."}), 400
         job.update(status="cancelled", finished_at=_now(), message="Dibatalkan")
+    return jsonify({"ok": True})
+
+
+@app.route("/api/queue/remove/<jid>", methods=["POST"])
+def api_queue_remove(jid):
+    """Hapus satu catatan job yang sudah selesai/gagal/dibatalkan (berkas tetap ada)."""
+    with job_store_lock:
+        job = JOB_STORE.get(jid)
+        if job is None:
+            return jsonify({"ok": False, "message": "Job tidak ditemukan"}), 404
+        if job["status"] in ("queued", "running"):
+            return jsonify({"ok": False, "message": "Batalkan dulu sebelum menghapus."}), 400
+        JOB_STORE.pop(jid, None)
     return jsonify({"ok": True})
 
 
