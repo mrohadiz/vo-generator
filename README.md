@@ -89,7 +89,7 @@ Hasil AI ditolak (pindah ke berikutnya) bila mengubah atau menghilangkan naskah 
 
 | Mesin | Cocok untuk | Kecepatan (kasar) | Catatan |
 |---|---|---|---|
-| **Supertonic** | Naskah panjang, banyak scene, campuran Indonesia–Inggris | ±0,5–1× durasi audio | Lokal. Suara M1–M5, F1–F5, 44,1 kHz. Tanpa kloning dan tanpa suara anak |
+| **Supertonic** | Naskah panjang, banyak scene, campuran Indonesia–Inggris | ±0,5–1× durasi audio | Lokal. Suara M1–M5, F1–F5, 44,1 kHz; bisa menambah suara kloning lewat JSON |
 | **Pocket-TTS** | Meniru suara dari sampel | ±3–4× | Lokal. 24 kHz, hanya Indonesia, rawan mengigau bila sampel atau teks buruk |
 | **Gemini TTS** | Narasi storyteller, ekspresi | ±0,4× | Cloud. `gemini-3.8-flash-tts` lewat API Gemini; gaya bacaan bekerja; batas ±4 panggilan/menit |
 | **Gemini via OmniRoute** | Kecepatan, naskah panjang | ±0,3× | Cloud. Suara sama, tanpa batas beruntun, tetapi gaya bacaan nyaris tidak berpengaruh |
@@ -100,7 +100,22 @@ Kecepatan adalah ukuran kasar di mesin pengembangan, bukan jaminan.
 ### Supertonic
 Emosi hanya mengatur **tempo baca** (sedih/berbisik lebih pelan, takut/senang lebih cepat) dan jeda; model terbuka ini tidak
 punya kontrol emosi, dan tag ekspresi `<laugh>`/`<sigh>` terbaca sebagai kata (sudah diuji). Kata Inggris dibaca dengan
-model bahasa Inggris. Kloning suara tidak tersedia di bobot terbuka (Voice Builder resmi sudah ditutup).
+model bahasa Inggris.
+
+**Suara kloning (eksperimental).** Bobot terbuka Supertonic tidak punya *speaker encoder*, tetapi ada pipeline komunitas
+yang membalik rekaman referensi menjadi berkas gaya suara JSON:
+[`Mimocro/supertonic-voice-cloning`](https://github.com/Mimocro/supertonic-voice-cloning). Pipeline itu butuh **GPU
+NVIDIA ≥ 6 GB VRAM** (CUDA; CPU tidak didukung), jadi jalankan di mesin lain, Colab, atau RunPod — bukan di server ini
+(tanpa GPU). Setelah JSON-nya jadi:
+
+1. Salin berkas hasil (mis. `cloned_voice.10000.json`) ke `voices/supertonic/nama_suara.json`.
+2. Muat ulang halaman Studio; suara muncul di dropdown Supertonic sebagai **“nama suara (kloning)”**.
+3. Berkas JSON yang bukan gaya Supertonic 3 (dimensi `style_ttl` 1×50×256 dan `style_dp` 1×8×16) dilewati dengan
+   peringatan di log.
+
+Hasil kloning sangat bergantung pada sampel: satu penutur, bersih tanpa musik, 10–30 detik. Berkas JSON ±290 KB dan
+tidak ikut git (`voices/supertonic/*.json` diabaikan); simpan cadangannya sendiri. Suara kloning tidak dimasukkan ke
+rekomendasi AI karena karakter timbrenya tidak bisa dinilai dari teks — pilih manual di dropdown.
 
 ### Pocket-TTS
 - Taruh sampel (`.wav`, `.mp3`, `.ogg`, `.flac`) di `suara-kloning/`; nama berkas menjadi nama suara.
@@ -193,6 +208,7 @@ docs/                Rencana dan catatan
 tts-kloning.py       Servis kloning mandiri (versi awal)
 bench_supertonic.py  Benchmark Supertonic
 suara-kloning/       Sampel suara Pocket-TTS (tidak ikut git)
+voices/supertonic/   Gaya suara kloning Supertonic (.json, tidak ikut git)
 output/              Hasil audio (tidak ikut git)
 ```
 

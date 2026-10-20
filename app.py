@@ -61,6 +61,64 @@ SUPERTONIC_VOICES = [
     {"id": "F5", "name": "F5 - Wanita (Ekspresif)", "gender": "female"},
 ]
 
+# --- Suara kloning Supertonic ---
+# File JSON gaya suara (style_ttl + style_dp) diletakkan manual di voices/supertonic/,
+# mis. hasil pipeline https://github.com/Mimocro/supertonic-voice-cloning (butuh GPU CUDA).
+CUSTOM_VOICE_DIR = os.path.join(BASE_DIR, "voices", "supertonic")
+_custom_voice_cache = {"sig": None, "voices": []}
+
+
+def _scan_custom_voices():
+    """Baca voices/supertonic/*.json; berkas yang bukan style Supertonic 3 dilewati."""
+    found = []
+    try:
+        names = sorted(os.listdir(CUSTOM_VOICE_DIR))
+    except OSError:
+        return found
+    for fn in names:
+        if not fn.lower().endswith(".json"):
+            continue
+        path = os.path.join(CUSTOM_VOICE_DIR, fn)
+        try:
+            with open(path, encoding="utf-8") as f:
+                data = json.load(f)
+            dims_ttl = list((data.get("style_ttl") or {}).get("dims") or [])
+            dims_dp = list((data.get("style_dp") or {}).get("dims") or [])
+            if dims_ttl != [1, 50, 256] or dims_dp != [1, 8, 16]:
+                raise ValueError("dimensi style_ttl/style_dp bukan milik Supertonic 3")
+        except Exception as e:
+            print(f"⚠️  Suara kloning dilewati: {fn} ({e})", flush=True)
+            continue
+        stem = os.path.splitext(fn)[0]
+        slug = re.sub(r"[^A-Za-z0-9]+", "_", stem).strip("_") or "voice"
+        found.append({
+            "id": f"custom_{slug}",
+            "name": f"{stem.replace('_', ' ').strip()} (kloning)",
+            "path": path,
+        })
+    return found
+
+
+def custom_supertonic_voices():
+    """Daftar suara kloning; dipindai ulang otomatis saat isi folder berubah."""
+    try:
+        sig = os.stat(CUSTOM_VOICE_DIR).st_mtime_ns
+    except OSError:
+        return []
+    if _custom_voice_cache["sig"] != sig:
+        _custom_voice_cache["voices"] = _scan_custom_voices()
+        _custom_voice_cache["sig"] = sig
+    return list(_custom_voice_cache["voices"])
+
+
+def supertonic_voice_options():
+    """Preset bawaan + suara kloning untuk dropdown."""
+    voices = [dict(v) for v in SUPERTONIC_VOICES]
+    for v in custom_supertonic_voices():
+        voices.append({"id": v["id"], "name": v["name"], "gender": "custom", "custom": True})
+    return voices
+
+
 # Global lock untuk menjaga eksekusi sintesis aman di CPU
 lock_sintesis = threading.Lock()
 
@@ -311,7 +369,7 @@ def api_options():
                 "description": "Sangat cepat di CPU (~10s untuk 20s audio), intonasi stabil, tanpa sampel file.",
                 "supports_preview": False,
                 "supports_speed": True,
-                "voices": SUPERTONIC_VOICES,
+                "voices": supertonic_voice_options(),
             },
             {
                 "id": "gemini_tts",
@@ -469,8 +527,12 @@ def _synth_supertonic(text, voice_id, speed):
     tts = load_supertonic()
     if tts is None:
         raise RuntimeError("Gagal memuat Supertonic")
-    style_name = voice_id if voice_id in tts.voice_style_names else "M1"
-    style = tts.get_voice_style(style_name)
+    custom = {v["id"]: v["path"] for v in custom_supertonic_voices()}
+    if voice_id in custom:
+        style = tts.get_voice_style_from_path(custom[voice_id])
+    else:
+        style_name = voice_id if voice_id in tts.voice_style_names else "M1"
+        style = tts.get_voice_style(style_name)
     gap = np.zeros(int(tts.sample_rate * 0.12), dtype=np.float32)
     chunks = []
     # Kata Inggris dibacakan dengan model bahasa Inggris, sisanya bahasa Indonesia

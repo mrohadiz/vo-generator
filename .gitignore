@@ -28,6 +28,9 @@ suara-kloning/
 *.wav
 *.mp3
 
+# --- suara kloning Supertonic (JSON pribadi, simpan cadangan sendiri) ---
+voices/supertonic/*.json
+
 # --- skrip lama dengan kunci tertanam di kode (pindahkan kunci ke .env sebelum dikomit) ---
 download_broll.py
 
