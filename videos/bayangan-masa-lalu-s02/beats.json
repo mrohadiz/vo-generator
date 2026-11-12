@@ -1,0 +1,265 @@
+{
+ "beats": [
+  {
+   "a": 0,
+   "b": 3,
+   "name": "Mendengarkan Dalam Sunyi",
+   "mood": "cold",
+   "note": "Siluet seseorang duduk terpaku di dekat jendela malam berembun sambil menatap rintik hujan yang suram.",
+   "queries": [
+    "rain drops falling on window pane night",
+    "silhouette sitting alone in dark room",
+    "dim street light reflection in puddle"
+   ],
+   "start": 0.0,
+   "end": 20.83,
+   "text": "Aku sering bercerita, tentang hariku yang dulu bersamanya, namun Langit hanya mendengarkan dengan sabar, meski cerita itu mungkin menyakiti hatinya. Kamu.. nggak capek dengerin ceritaku yang itu-itu aja? Kalau itu bikin kamu lega, aku nggak masalah"
+  },
+  {
+   "a": 4,
+   "b": 6,
+   "name": "Harapan Terpendam",
+   "mood": "neutral",
+   "note": "Pemandangan jalan berkabut tipis yang sunyi, menggambarkan angan yang tak pernah tersampaikan.",
+   "queries": [
+    "empty misty road at dawn",
+    "bare tree branch swaying in wind",
+    "distant city lights through foggy glass"
+   ],
+   "start": 20.83,
+   "end": 34.28,
+   "text": "Padahal sebenarnya, ia ingin sekali Layla bercerita tentang dirinya. Tentang masa depan, tentang mimpi baru. Tapi Langit tahu, memaksa perasaan hanya akan membuat Layla menjauh darinya."
+  },
+  {
+   "a": 7,
+   "b": 9,
+   "name": "Kenyataan Retak",
+   "mood": "cold",
+   "note": "Cahaya redup dengan bayangan muram yang bergeser perlahan, menangkap ketegangan sunyi yang membekukan.",
+   "queries": [
+    "shadow moving across textured wall",
+    "dark moody coffee cup steam rising",
+    "gloomy overcast sky time lapse"
+   ],
+   "start": 34.28,
+   "end": 51.45,
+   "text": "Hari-hari mereka berjalan sederhana. Berkomunikasi selayaknya orang yang saling jatuh cinta. Namun saat hari itu, Layla tiba-tiba mengatakan hal yang membuatnya merasa ingin marah tapi tak punya hak untuk marah."
+  },
+  {
+   "a": 10,
+   "b": 14,
+   "name": "Hantaman Masa Lalu",
+   "mood": "cold",
+   "note": "Pantulan lampu kota yang kabur di aspal basah malam hari saat pengakuan menyakitkan diutarakan.",
+   "queries": [
+    "blurred headlights passing through rain blur",
+    "solitary figure walking under umbrella night",
+    "ripples on dark cold water surface"
+   ],
+   "start": 51.45,
+   "end": 65.24,
+   "text": "Kamu lagi sibuk banget ya? Aku habis ketemu dia, Langit... dan kamu tahu? Dia bilang masih sayang aku, dia butuh aku... aku nggak tahu harus bersikap gimana"
+  },
+  {
+   "a": 15,
+   "b": 18,
+   "name": "Menanti Tanpa Kepastian",
+   "mood": "cold",
+   "note": "Sosok berdiri memandang kejauhan laut malam yang kelam, pasrah menanti kepastian rasa yang belum tentu datang.",
+   "queries": [
+    "silhouette looking out dark sea horizon",
+    "flickering streetlight in thick fog",
+    "dry fallen leaves drifting in wind"
+   ],
+   "start": 65.24,
+   "end": 85.2,
+   "text": "Langit hanya tersenyum tipis, namun dalam hatinya ia sangat kecewa. Masa lalu Layla bukan kenangan biasa. Itu adalah luka yang belum sembuh. Ia tidak bisa memaksa untuk mencintai dirinya, ia hanya bisa menunggu sampai rasa itu ada dan berpihak padanya."
+  }
+ ],
+ "bounds": [
+  0.0,
+  20.83,
+  34.28,
+  51.45,
+  65.24,
+  85.2
+ ],
+ "sentences": [
+  {
+   "k": 0,
+   "first": 0,
+   "last": 19,
+   "start": 0.0,
+   "end": 10.04,
+   "spk": "Narator",
+   "text": "Aku sering bercerita, tentang hariku yang dulu bersamanya, namun Langit hanya mendengarkan dengan sabar, meski cerita itu mungkin menyakiti hatinya."
+  },
+  {
+   "k": 1,
+   "first": 20,
+   "last": 20,
+   "start": 11.62,
+   "end": 12.32,
+   "spk": "Layla",
+   "text": "Kamu.."
+  },
+  {
+   "k": 2,
+   "first": 21,
+   "last": 27,
+   "start": 12.32,
+   "end": 16.18,
+   "spk": "Layla",
+   "text": "nggak capek dengerin ceritaku yang itu-itu aja?"
+  },
+  {
+   "k": 3,
+   "first": 28,
+   "last": 35,
+   "start": 17.68,
+   "end": 20.16,
+   "spk": "Langit",
+   "text": "Kalau itu bikin kamu lega, aku nggak masalah"
+  },
+  {
+   "k": 4,
+   "first": 36,
+   "last": 44,
+   "start": 21.5,
+   "end": 26.14,
+   "spk": "Narator",
+   "text": "Padahal sebenarnya, ia ingin sekali Layla bercerita tentang dirinya."
+  },
+  {
+   "k": 5,
+   "first": 45,
+   "last": 50,
+   "start": 26.62,
+   "end": 28.92,
+   "spk": "Narator",
+   "text": "Tentang masa depan, tentang mimpi baru."
+  },
+  {
+   "k": 6,
+   "first": 51,
+   "last": 61,
+   "start": 28.92,
+   "end": 34.28,
+   "spk": "Narator",
+   "text": "Tapi Langit tahu, memaksa perasaan hanya akan membuat Layla menjauh darinya."
+  },
+  {
+   "k": 7,
+   "first": 62,
+   "last": 65,
+   "start": 34.28,
+   "end": 38.02,
+   "spk": "Narator",
+   "text": "Hari-hari mereka berjalan sederhana."
+  },
+  {
+   "k": 8,
+   "first": 66,
+   "last": 72,
+   "start": 38.58,
+   "end": 42.18,
+   "spk": "Narator",
+   "text": "Berkomunikasi selayaknya orang yang saling jatuh cinta."
+  },
+  {
+   "k": 9,
+   "first": 73,
+   "last": 91,
+   "start": 42.64,
+   "end": 50.86,
+   "spk": "Narator",
+   "text": "Namun saat hari itu, Layla tiba-tiba mengatakan hal yang membuatnya merasa ingin marah tapi tak punya hak untuk marah."
+  },
+  {
+   "k": 10,
+   "first": 92,
+   "last": 96,
+   "start": 52.03,
+   "end": 53.24,
+   "spk": "Langit",
+   "text": "Kamu lagi sibuk banget ya?"
+  },
+  {
+   "k": 11,
+   "first": 97,
+   "last": 101,
+   "start": 54.36,
+   "end": 56.94,
+   "spk": "Layla",
+   "text": "Aku habis ketemu dia, Langit..."
+  },
+  {
+   "k": 12,
+   "first": 102,
+   "last": 104,
+   "start": 56.94,
+   "end": 58.12,
+   "spk": "Layla",
+   "text": "dan kamu tahu?"
+  },
+  {
+   "k": 13,
+   "first": 105,
+   "last": 112,
+   "start": 58.78,
+   "end": 61.66,
+   "spk": "Layla",
+   "text": "Dia bilang masih sayang aku, dia butuh aku..."
+  },
+  {
+   "k": 14,
+   "first": 113,
+   "last": 118,
+   "start": 62.22,
+   "end": 64.4,
+   "spk": "Layla",
+   "text": "aku nggak tahu harus bersikap gimana"
+  },
+  {
+   "k": 15,
+   "first": 119,
+   "last": 128,
+   "start": 66.08,
+   "end": 69.84,
+   "spk": "Langit",
+   "text": "Langit hanya tersenyum tipis, namun dalam hatinya ia sangat kecewa."
+  },
+  {
+   "k": 16,
+   "first": 129,
+   "last": 134,
+   "start": 71.3,
+   "end": 73.94,
+   "spk": "Narator",
+   "text": "Masa lalu Layla bukan kenangan biasa."
+  },
+  {
+   "k": 17,
+   "first": 135,
+   "last": 140,
+   "start": 74.36,
+   "end": 76.38,
+   "spk": "Narator",
+   "text": "Itu adalah luka yang belum sembuh."
+  },
+  {
+   "k": 18,
+   "first": 141,
+   "last": 158,
+   "start": 76.38,
+   "end": 84.0,
+   "spk": "Narator",
+   "text": "Ia tidak bisa memaksa untuk mencintai dirinya, ia hanya bisa menunggu sampai rasa itu ada dan berpihak padanya."
+  }
+ ],
+ "info": {
+  "mode": "ai",
+  "model": "omniroute/agy/gemini-3.8-flash-tiered",
+  "note": ""
+ }
+}

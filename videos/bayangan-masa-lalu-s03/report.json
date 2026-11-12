@@ -1,0 +1,58 @@
+{
+ "scene": 3,
+ "project": "bayangan-masa-lalu-s03",
+ "duration": 39.8,
+ "beats": [
+  {
+   "name": "Pesan Kehangatan",
+   "mood": "warm",
+   "start": 0.0,
+   "end": 18.7
+  },
+  {
+   "name": "Senyum Terselubung",
+   "mood": "neutral",
+   "start": 18.7,
+   "end": 30.34
+  },
+  {
+   "name": "Belenggu Masa Lalu",
+   "mood": "cold",
+   "start": 30.34,
+   "end": 39.8
+  }
+ ],
+ "check": [
+  {
+   "contrast_fails": [],
+   "layout": [],
+   "errors": []
+  }
+ ],
+ "contrast_ok": true,
+ "review": {
+  "times": [
+   9.3,
+   24.5,
+   35.1
+  ],
+  "sheet": "/home/rohadi/Projects/tts-narasi/videos/bayangan-masa-lalu-s03/snapshots/final/contact-sheet.jpg",
+  "ai": {
+   "model": "omniroute/agy/gemini-3.8-flash-tiered",
+   "panels": [
+    {
+     "readable": true,
+     "issue": ""
+    },
+    {
+     "readable": true,
+     "issue": ""
+    },
+    {
+     "readable": true,
+     "issue": ""
+    }
+   ]
+  }
+ }
+}

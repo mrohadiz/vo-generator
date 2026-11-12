@@ -1,0 +1,116 @@
+{
+ "beats": [
+  {
+   "a": 0,
+   "b": 2,
+   "name": "Pesan Kehangatan",
+   "mood": "warm",
+   "note": "Cahaya hangat dari layar ponsel menerangi kegelapan kamar saat pesan ulang tahun manis diterima.",
+   "queries": [
+    "phone screen glowing in dark room",
+    "soft bokeh fairy lights warm night",
+    "hands holding smartphone in bed"
+   ],
+   "start": 0.0,
+   "end": 18.7,
+   "text": "Hari ini Layla ulang tahun dan Langit pun tak lupa memberi ucapan kepadanya. Selamat ulang tahun Layla, semoga semua harapan kamu terkabul, dan jangan lupa untuk bahagia, aku sayang kamu dan selalu ada untukmu. Thanks Langit, aku beruntung punya kamu."
+  },
+  {
+   "a": 3,
+   "b": 4,
+   "name": "Senyum Terselubung",
+   "mood": "neutral",
+   "note": "Siluet seseorang di tepi jendela kamar yang temaram dengan pantulan cahaya malam yang ragu-ragu.",
+   "queries": [
+    "woman silhouette looking out window at night",
+    "lonely room dim lamp lighting shadow",
+    "rain droplets falling on glass window"
+   ],
+   "start": 18.7,
+   "end": 30.34,
+   "text": "Layla tersenyum saat membaca pesan dari Langit, namun di balik senyumnya itu ada rasa yang tak mampu ia jelaskan. Ia merasa hangat, tapi juga bersalah."
+  },
+  {
+   "a": 5,
+   "b": 5,
+   "name": "Belenggu Masa Lalu",
+   "mood": "cold",
+   "note": "Suasana dingin jalanan berkabut di malam hari yang sepi menggambarkan batin yang belum lepas dari masa lalu.",
+   "queries": [
+    "foggy empty street cold blue night",
+    "blurred headlights dark rainy asphalt",
+    "solitary figure walking in cold mist"
+   ],
+   "start": 30.34,
+   "end": 39.8,
+   "text": "Karena di saat Langit tulus berdiri di sisinya, hatinya masih sering goyah oleh masa lalu yang belum benar-benar ia lepaskan."
+  }
+ ],
+ "bounds": [
+  0.0,
+  18.7,
+  30.34,
+  39.8
+ ],
+ "sentences": [
+  {
+   "k": 0,
+   "first": 0,
+   "last": 12,
+   "start": 0.0,
+   "end": 5.3,
+   "spk": "Narator",
+   "text": "Hari ini Layla ulang tahun dan Langit pun tak lupa memberi ucapan kepadanya."
+  },
+  {
+   "k": 1,
+   "first": 13,
+   "last": 33,
+   "start": 6.74,
+   "end": 14.62,
+   "spk": "Langit",
+   "text": "Selamat ulang tahun Layla, semoga semua harapan kamu terkabul, dan jangan lupa untuk bahagia, aku sayang kamu dan selalu ada untukmu."
+  },
+  {
+   "k": 2,
+   "first": 34,
+   "last": 39,
+   "start": 16.0,
+   "end": 18.0,
+   "spk": "Layla",
+   "text": "Thanks Langit, aku beruntung punya kamu."
+  },
+  {
+   "k": 3,
+   "first": 40,
+   "last": 58,
+   "start": 19.4,
+   "end": 26.92,
+   "spk": "Narator",
+   "text": "Layla tersenyum saat membaca pesan dari Langit, namun di balik senyumnya itu ada rasa yang tak mampu ia jelaskan."
+  },
+  {
+   "k": 4,
+   "first": 59,
+   "last": 64,
+   "start": 26.92,
+   "end": 30.34,
+   "spk": "Narator",
+   "text": "Ia merasa hangat, tapi juga bersalah."
+  },
+  {
+   "k": 5,
+   "first": 65,
+   "last": 84,
+   "start": 30.34,
+   "end": 38.74,
+   "spk": "Narator",
+   "text": "Karena di saat Langit tulus berdiri di sisinya, hatinya masih sering goyah oleh masa lalu yang belum benar-benar ia lepaskan."
+  }
+ ],
+ "info": {
+  "mode": "ai",
+  "model": "omniroute/agy/gemini-3.8-flash-tiered",
+  "note": ""
+ }
+}

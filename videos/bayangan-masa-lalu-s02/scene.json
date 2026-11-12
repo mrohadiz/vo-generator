@@ -1,0 +1,145 @@
+{
+ "title": "Bayangan Masa Lalu",
+ "scene_no": 2,
+ "scene_total": 6,
+ "duration": 85.2,
+ "audio": "assets/audio/scene_02.wav",
+ "bounds": [
+  0.0,
+  20.83,
+  34.28,
+  51.45,
+  65.24,
+  85.2
+ ],
+ "finale_from": null,
+ "speakers": {
+  "Layla": "left",
+  "Langit": "right"
+ },
+ "frames": [
+  {
+   "slug": "mendengarkan-dalam-sunyi",
+   "src": "assets/broll/B1_46637.mp4",
+   "media_start": 0.5,
+   "pos": "69% 50%",
+   "s0": 1.06,
+   "s1": 1.131,
+   "bloom": 0.0,
+   "treatment": {
+    "adjust": {
+     "exposure": -0.62,
+     "contrast": 0.14,
+     "saturation": -0.25,
+     "temperature": -0.12,
+     "highlights": -0.43,
+     "whites": -0.31
+    },
+    "details": {
+     "vignette": 0.46,
+     "vignetteFeather": 0.7,
+     "grain": 0.1,
+     "grainSize": 0.3
+    }
+   },
+   "p85": 0.56
+  },
+  {
+   "slug": "harapan-terpendam",
+   "src": "assets/broll/B2_209659.mp4",
+   "media_start": 0.5,
+   "pos": "50% 50%",
+   "s0": 1.06,
+   "s1": 1.108,
+   "bloom": 0.0,
+   "treatment": {
+    "adjust": {
+     "exposure": -0.21,
+     "contrast": 0.1,
+     "saturation": -0.21,
+     "temperature": -0.02
+    },
+    "details": {
+     "vignette": 0.42,
+     "vignetteFeather": 0.7,
+     "grain": 0.1,
+     "grainSize": 0.3
+    }
+   },
+   "p85": 0.29
+  },
+  {
+   "slug": "kenyataan-retak",
+   "src": "assets/broll/B3_130876.mp4",
+   "media_start": 0.5,
+   "pos": "65% 50%",
+   "s0": 1.06,
+   "s1": 1.12,
+   "bloom": 0.0,
+   "treatment": {
+    "adjust": {
+     "exposure": -0.18,
+     "contrast": 0.1,
+     "saturation": -0.2,
+     "temperature": -0.12
+    },
+    "details": {
+     "vignette": 0.42,
+     "vignetteFeather": 0.7,
+     "grain": 0.1,
+     "grainSize": 0.3
+    }
+   },
+   "p85": 0.27
+  },
+  {
+   "slug": "hantaman-masa-lalu",
+   "src": "assets/broll/B4_152798.mp4",
+   "media_start": 0.5,
+   "pos": "72% 50%",
+   "s0": 1.06,
+   "s1": 1.109,
+   "bloom": 0.0,
+   "treatment": {
+    "adjust": {
+     "exposure": -0.39,
+     "contrast": 0.12,
+     "saturation": -0.23,
+     "temperature": -0.12,
+     "highlights": -0.27
+    },
+    "details": {
+     "vignette": 0.44,
+     "vignetteFeather": 0.7,
+     "grain": 0.1,
+     "grainSize": 0.3
+    }
+   },
+   "p85": 0.41
+  },
+  {
+   "slug": "menanti-tanpa-kepastian",
+   "src": "assets/broll/B5_16160.mp4",
+   "media_start": 0.5,
+   "pos": "50% 50%",
+   "s0": 1.06,
+   "s1": 1.128,
+   "bloom": 0.0,
+   "treatment": {
+    "adjust": {
+     "exposure": -0.1,
+     "contrast": 0.09,
+     "saturation": -0.19,
+     "temperature": -0.12
+    },
+    "details": {
+     "vignette": 0.41,
+     "vignetteFeather": 0.7,
+     "grain": 0.1,
+     "grainSize": 0.3
+    }
+   },
+   "p85": 0.19
+  }
+ ]
+}

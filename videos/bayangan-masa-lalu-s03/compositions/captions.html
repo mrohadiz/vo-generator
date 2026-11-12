@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="id">
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        @font-face { font-family: "Fraunces"; src: url("assets/fonts/Fraunces-normal.woff2") format("woff2"); font-weight: 300 700; font-style: normal; }
+        @font-face { font-family: "Fraunces"; src: url("assets/fonts/Fraunces-italic.woff2") format("woff2"); font-weight: 300 700; font-style: italic; }
+        #captions { position: absolute; inset: 0; overflow: hidden; }
+        #captions .grp {
+          position: absolute; left: 108px; top: 1040px; width: 864px; opacity: 0;
+          display: flex; flex-wrap: wrap; column-gap: 0.26em; row-gap: 0;
+          font-family: "Fraunces", serif; font-weight: 300; font-size: 104px; line-height: 1.1; letter-spacing: -0.02em;
+          color: #B2ACA5;
+        }
+        #captions .grp.spk { font-style: italic; }
+        #captions .grp.r { justify-content: flex-end; text-align: right; }
+        #captions .grp .tag {
+          flex: 0 0 100%; font-family: "IBM Plex Mono", monospace; font-style: normal; font-weight: 400; font-size: 24px;
+          letter-spacing: 0.3em; text-transform: uppercase; color: #D08B5B; line-height: 1; margin-bottom: 22px;
+        }
+        #captions .grp.finale { font-style: italic; font-weight: 400; font-size: 128px; line-height: 1.06; letter-spacing: -0.025em; top: 560px; }
+        #captions .w { display: inline-block; transform-origin: 50% 70%; color: #B2ACA5; text-shadow: 0 2px 30px rgba(10,13,18,0.6); }
+      </style>
+      <div id="captions" data-composition-id="captions" data-width="1080" data-height="1920">
+      <div class="grp" id="g0"><span class="w" data-w="0">Hari</span><span class="w" data-w="1">ini</span><span class="w" data-w="2">Layla</span><span class="w" data-w="3">ulang</span></div>
+      <div class="grp" id="g1"><span class="w" data-w="4">tahun</span><span class="w" data-w="5">dan</span><span class="w" data-w="6">Langit</span></div>
+      <div class="grp" id="g2"><span class="w" data-w="7">pun</span><span class="w" data-w="8">tak</span><span class="w" data-w="9">lupa</span></div>
+      <div class="grp" id="g3"><span class="w" data-w="10">memberi</span><span class="w" data-w="11">ucapan</span><span class="w" data-w="12">kepadanya.</span></div>
+      <div class="grp spk" id="g4"><span class="tag">Langit</span><span class="w" data-w="13">Selamat</span><span class="w" data-w="14">ulang</span><span class="w" data-w="15">tahun</span><span class="w" data-w="16">Layla,</span></div>
+      <div class="grp spk" id="g5"><span class="w" data-w="17">semoga</span><span class="w" data-w="18">semua</span></div>
+      <div class="grp spk" id="g6"><span class="w" data-w="19">harapan</span><span class="w" data-w="20">kamu</span><span class="w" data-w="21">terkabul,</span></div>
+      <div class="grp spk" id="g7"><span class="w" data-w="22">dan</span><span class="w" data-w="23">jangan</span><span class="w" data-w="24">lupa</span></div>
+      <div class="grp spk" id="g8"><span class="w" data-w="25">untuk</span><span class="w" data-w="26">bahagia,</span></div>
+      <div class="grp spk" id="g9"><span class="w" data-w="27">aku</span><span class="w" data-w="28">sayang</span><span class="w" data-w="29">kamu</span><span class="w" data-w="30">dan</span></div>
+      <div class="grp spk" id="g10"><span class="w" data-w="31">selalu</span><span class="w" data-w="32">ada</span><span class="w" data-w="33">untukmu.</span></div>
+      <div class="grp spk r" id="g11"><span class="tag">Layla</span><span class="w" data-w="34">Thanks</span><span class="w" data-w="35">Langit,</span></div>
+      <div class="grp spk r" id="g12"><span class="w" data-w="36">aku</span><span class="w" data-w="37">beruntung</span><span class="w" data-w="38">punya</span><span class="w" data-w="39">kamu.</span></div>
+      <div class="grp" id="g13"><span class="w" data-w="40">Layla</span><span class="w" data-w="41">tersenyum</span><span class="w" data-w="42">saat</span><span class="w" data-w="43">membaca</span></div>
+      <div class="grp" id="g14"><span class="w" data-w="44">pesan</span><span class="w" data-w="45">dari</span><span class="w" data-w="46">Langit,</span></div>
+      <div class="grp" id="g15"><span class="w" data-w="47">namun</span><span class="w" data-w="48">di</span><span class="w" data-w="49">balik</span><span class="w" data-w="50">senyumnya</span><span class="w" data-w="51">itu</span></div>
+      <div class="grp" id="g16"><span class="w" data-w="52">ada</span><span class="w" data-w="53">rasa</span><span class="w" data-w="54">yang</span><span class="w" data-w="55">tak</span></div>
+      <div class="grp" id="g17"><span class="w" data-w="56">mampu</span><span class="w" data-w="57">ia</span><span class="w" data-w="58">jelaskan.</span></div>
+      <div class="grp" id="g18"><span class="w" data-w="59">Ia</span><span class="w" data-w="60">merasa</span><span class="w" data-w="61">hangat,</span></div>
+      <div class="grp" id="g19"><span class="w" data-w="62">tapi</span><span class="w" data-w="63">juga</span><span class="w" data-w="64">bersalah.</span></div>
+      <div class="grp" id="g20"><span class="w" data-w="65">Karena</span><span class="w" data-w="66">di</span><span class="w" data-w="67">saat</span><span class="w" data-w="68">Langit</span></div>
+      <div class="grp" id="g21"><span class="w" data-w="69">tulus</span><span class="w" data-w="70">berdiri</span><span class="w" data-w="71">di</span><span class="w" data-w="72">sisinya,</span></div>
+      <div class="grp" id="g22"><span class="w" data-w="73">hatinya</span><span class="w" data-w="74">masih</span><span class="w" data-w="75">sering</span><span class="w" data-w="76">goyah</span></div>
+      <div class="grp" id="g23"><span class="w" data-w="77">oleh</span><span class="w" data-w="78">masa</span><span class="w" data-w="79">lalu</span><span class="w" data-w="80">yang</span></div>
+      <div class="grp" id="g24"><span class="w" data-w="81">belum</span><span class="w" data-w="82">benar-benar</span><span class="w" data-w="83">ia</span><span class="w" data-w="84">lepaskan.</span></div>
+      </div>
+      <script>
+      const WINS = [[0.0, 1.68], [1.68, 2.62], [2.62, 3.68], [3.68, 5.65], [6.7, 8.46], [8.46, 9.04], [9.04, 10.48], [10.48, 11.38], [11.38, 12.14], [12.14, 13.44], [13.44, 14.97], [15.96, 16.78], [16.78, 18.35], [19.36, 21.44], [21.44, 22.84], [22.84, 24.56], [24.56, 25.58], [25.58, 26.88], [26.88, 29.0], [29.0, 30.3], [30.3, 31.82], [31.82, 33.82], [33.82, 35.44], [35.44, 36.68], [36.68, 39.8]];
+      const TIMINGS = [[0.0, 0.68], [0.68, 0.98], [0.98, 1.38], [1.38, 1.72], [1.72, 2.0], [2.0, 2.34], [2.34, 2.66], [2.66, 2.96], [2.96, 3.48], [3.48, 3.72], [3.72, 4.14], [4.14, 4.68], [4.68, 5.3], [6.74, 7.24], [7.24, 7.54], [7.54, 7.72], [7.72, 8.2], [8.5, 8.84], [8.84, 9.08], [9.08, 9.64], [9.64, 9.96], [9.96, 10.52], [10.52, 10.88], [10.88, 11.14], [11.14, 11.42], [11.42, 11.6], [11.6, 12.18], [12.18, 12.64], [12.64, 12.94], [12.94, 13.22], [13.22, 13.48], [13.48, 13.92], [13.92, 14.1], [14.1, 14.62], [16.0, 16.42], [16.42, 16.82], [16.82, 17.06], [17.06, 17.48], [17.48, 17.72], [17.72, 18.0], [19.4, 20.12], [20.12, 20.66], [20.66, 20.92], [20.92, 21.48], [21.48, 21.92], [21.92, 22.14], [22.14, 22.62], [22.88, 23.26], [23.26, 23.391], [23.391, 23.72], [23.72, 24.24], [24.24, 24.6], [24.6, 24.94], [24.94, 25.24], [25.24, 25.48], [25.48, 25.62], [25.62, 26.02], [26.02, 26.22], [26.22, 26.92], [26.92, 28.06], [28.06, 28.46], [28.46, 29.04], [29.04, 29.4], [29.4, 29.72], [29.72, 30.34], [30.34, 30.94], [30.94, 31.2], [31.2, 31.42], [31.42, 31.86], [31.86, 32.18], [32.18, 32.6], [32.6, 32.84], [32.84, 33.44], [33.86, 34.4], [34.4, 34.7], [34.7, 35.1], [35.1, 35.48], [35.48, 35.74], [35.74, 36.08], [36.08, 36.52], [36.52, 36.72], [36.72, 36.94], [36.94, 37.78], [37.78, 37.98], [37.98, 38.74]];
+      const DURATION = 39.8;
+      const tl = gsap.timeline({ paused: true });
+
+      // grup: muncul sekali, mati keras setelah selesai
+      WINS.forEach((w, n) => {
+        tl.fromTo("#g" + n, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.14, ease: "power2.out" }, w[0]);
+        tl.set("#g" + n, { opacity: 0 }, w[1]);
+      });
+      tl.to("#g24", { opacity: 0, duration: 0.8, ease: "sine.in" }, DURATION - 0.8);
+
+      // asr-keyword-glow, gaya karaoke: satu driver linear, envelope attack-sustain-release per kata
+      const ATTACK = 0.10, RELEASE = 0.40, REST = 0.55, MAX_BLUR = 26, MAX_SCALE = 0.05;
+      const REST_RGB = [178, 172, 165], FINALE_REST_RGB = [204, 199, 192], ACTIVE_RGB = [234, 227, 214], EMBER = [208, 139, 91];
+      const els = Array.from(document.querySelectorAll("#captions .w"));
+      const lerp = (a, b, t) => Math.round(a + (b - a) * t);
+      function envelope(time, s, e) {
+        if (time < s) return 0;
+        if (time < e) return Math.min((time - s) / ATTACK, 1);
+        if (time < e + RELEASE) return 1 - ((time - e) / RELEASE) * (1 - REST);
+        return REST;
+      }
+      const driver = { t: 0 };
+      tl.to(driver, { t: DURATION, duration: DURATION, ease: "none", onUpdate: () => {
+        els.forEach((el) => {
+          const tm = TIMINGS[+el.dataset.w];
+          const env = envelope(driver.t, tm[0], tm[1]);
+          const glow = Math.max(0, (env - REST) / (1 - REST));
+          const base = el.parentElement.classList.contains("finale") ? FINALE_REST_RGB : REST_RGB;
+          const c = [0, 1, 2].map((k) => lerp(base[k], ACTIVE_RGB[k], env));
+          el.style.color = "rgb(" + c.join(",") + ")";
+          el.style.textShadow = "0 2px 30px rgba(10,13,18,0.6), 0 0 " + (MAX_BLUR * glow).toFixed(1) + "px rgba(" + EMBER.join(",") + "," + (0.75 * glow).toFixed(3) + ")";
+          el.style.transform = "scale(" + (1 + MAX_SCALE * glow).toFixed(4) + ")";
+        });
+      } }, 0);
+
+      window.__timelines["captions"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

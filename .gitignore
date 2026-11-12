@@ -46,6 +46,9 @@ videos/*/.media/
 videos/*/.thumbnails/
 videos/*/.waveform-cache/
 videos/*/node_modules/
+videos/*/broll/sheets/
+videos/_cache/
+videos/*-concat.txt
 
 # --- editor & sistem ---
 .DS_Store

@@ -1,0 +1,112 @@
+[
+ {
+  "clip": {
+   "id": 46637,
+   "page": "https://pixabay.com/videos/id-46637/",
+   "user": "thuanvo",
+   "duration": 24,
+   "w": 1920,
+   "h": 1080,
+   "tags": "alone, person, man, people, guitar, sing, lonely, child, love, guy, happy, young, river, life, freedom, streets, night, light, sky, outdoor"
+  },
+  "src": "assets/broll/B1_46637.mp4",
+  "path": "/home/rohadi/Projects/tts-narasi/videos/bayangan-masa-lalu-s02/assets/broll/B1_46637.mp4",
+  "media_start": 0.5,
+  "pos": "69% 50%",
+  "pick": {
+   "mode": "ai",
+   "model": "omniroute/agy/gemini-3.8-flash-tiered",
+   "reason": "Siluet pria yang tenang menatap malam secara visual mewakili sosok Langit yang mendengarkan dalam kesunyian dengan nuansa reflektif dan melankolis.",
+   "focus_x": 63
+  },
+  "dur": 21.229999999999997
+ },
+ {
+  "clip": {
+   "id": 209659,
+   "page": "https://pixabay.com/videos/id-209659/",
+   "user": "eamonq",
+   "duration": 17,
+   "w": 1080,
+   "h": 1920,
+   "tags": "trees, pine trees, forest, misty, snow, winter, drone"
+  },
+  "src": "assets/broll/B2_209659.mp4",
+  "path": "/home/rohadi/Projects/tts-narasi/videos/bayangan-masa-lalu-s02/assets/broll/B2_209659.mp4",
+  "media_start": 0.5,
+  "pos": "50% 50%",
+  "pick": {
+   "mode": "ai",
+   "model": "omniroute/agy/gemini-3.8-flash-tiered",
+   "reason": "Pemandangan berkabut dingin dan sunyi pada klip 3 sangat pas dengan atmosfer sedih dan reflektif, serta memiliki area bawah yang gelap dan bersih untuk keterbacaan teks narasi.",
+   "focus_x": 50
+  },
+  "dur": 14.25
+ },
+ {
+  "clip": {
+   "id": 130876,
+   "page": "https://pixabay.com/videos/id-130876/",
+   "user": "Joe_hackney",
+   "duration": 60,
+   "w": 1920,
+   "h": 1080,
+   "tags": "fog, rain, beautiful wallpaper, mist, candles, book, cup, steam, chair, windchime, pavilion, tree, field, landscape, background, nature"
+  },
+  "src": "assets/broll/B3_130876.mp4",
+  "path": "/home/rohadi/Projects/tts-narasi/videos/bayangan-masa-lalu-s02/assets/broll/B3_130876.mp4",
+  "media_start": 0.5,
+  "pos": "65% 50%",
+  "pick": {
+   "mode": "ai",
+   "model": "omniroute/agy/gemini-3.8-flash-tiered",
+   "reason": "Suasana teras kabin yang sepi dengan latar hutan berkabut dingin sangat kuat menangkap ketegangan sunyi dan rasa keterasingan yang membekukan.",
+   "focus_x": 60
+  },
+  "dur": 17.97
+ },
+ {
+  "clip": {
+   "id": 152798,
+   "page": "https://pixabay.com/videos/id-152798/",
+   "user": "ghasoub",
+   "duration": 27,
+   "w": 1920,
+   "h": 1080,
+   "tags": "couple, lovers, hands, love, street, walking"
+  },
+  "src": "assets/broll/B4_152798.mp4",
+  "path": "/home/rohadi/Projects/tts-narasi/videos/bayangan-masa-lalu-s02/assets/broll/B4_152798.mp4",
+  "media_start": 0.5,
+  "pos": "72% 50%",
+  "pick": {
+   "mode": "ai",
+   "model": "omniroute/agy/gemini-3.8-flash-tiered",
+   "reason": "Siluet genggaman tangan sangat kuat memvisualisasikan memori perjumpaan dan rasa bimbang terhadap mantan kekasih sesuai narasi Layla.",
+   "focus_x": 65
+  },
+  "dur": 14.589999999999996
+ },
+ {
+  "clip": {
+   "id": 16160,
+   "page": "https://pixabay.com/videos/id-16160/",
+   "user": "Macb3t",
+   "duration": 40,
+   "w": 1920,
+   "h": 1080,
+   "tags": "storm, ocean, sky, rain, the waves, wind, dark clouds, rolling sea, anger, a strong wind, clouds, sea, night, darkness, rainy, cloudy, water, lightning"
+  },
+  "src": "assets/broll/B5_16160.mp4",
+  "path": "/home/rohadi/Projects/tts-narasi/videos/bayangan-masa-lalu-s02/assets/broll/B5_16160.mp4",
+  "media_start": 0.5,
+  "pos": "50% 50%",
+  "pick": {
+   "mode": "ai",
+   "model": "omniroute/agy/gemini-3.8-flash-tiered",
+   "reason": "Visual laut malam yang kelam dan dingin sangat selaras dengan suasana hati pasrah, kecewa, serta latar belakangnya yang gelap ideal untuk keterbacaan teks narasi.",
+   "focus_x": 50
+  },
+  "dur": 20.360000000000014
+ }
+]

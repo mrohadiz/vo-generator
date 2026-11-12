@@ -1,0 +1,95 @@
+{
+ "title": "Bayangan Masa Lalu",
+ "scene_no": 3,
+ "scene_total": 6,
+ "duration": 39.8,
+ "audio": "assets/audio/scene_03.wav",
+ "bounds": [
+  0.0,
+  18.7,
+  30.34,
+  39.8
+ ],
+ "finale_from": null,
+ "speakers": {
+  "Langit": "left",
+  "Layla": "right"
+ },
+ "frames": [
+  {
+   "slug": "pesan-kehangatan",
+   "src": "assets/broll/B1_42408.mp4",
+   "media_start": 0.5,
+   "pos": "62% 50%",
+   "s0": 1.06,
+   "s1": 1.124,
+   "bloom": 0.28,
+   "treatment": {
+    "adjust": {
+     "exposure": -0.25,
+     "contrast": 0.11,
+     "saturation": -0.21,
+     "temperature": 0.1
+    },
+    "details": {
+     "vignette": 0.43,
+     "vignetteFeather": 0.7,
+     "grain": 0.1,
+     "grainSize": 0.3
+    }
+   },
+   "p85": 0.32
+  },
+  {
+   "slug": "senyum-terselubung",
+   "src": "assets/broll/B2_61706.mp4",
+   "media_start": 0.5,
+   "pos": "100% 50%",
+   "s0": 1.06,
+   "s1": 1.101,
+   "bloom": 0.0,
+   "treatment": {
+    "adjust": {
+     "exposure": -0.31,
+     "contrast": 0.11,
+     "saturation": -0.22,
+     "temperature": -0.02,
+     "highlights": -0.22
+    },
+    "details": {
+     "vignette": 0.43,
+     "vignetteFeather": 0.7,
+     "grain": 0.1,
+     "grainSize": 0.3
+    }
+   },
+   "p85": 0.36
+  },
+  {
+   "slug": "belenggu-masa-lalu",
+   "src": "assets/broll/B3_258794.mp4",
+   "media_start": 0.5,
+   "pos": "50% 50%",
+   "s0": 1.06,
+   "s1": 1.093,
+   "bloom": 0.0,
+   "treatment": {
+    "adjust": {
+     "exposure": -1.2,
+     "contrast": 0.18,
+     "saturation": -0.3,
+     "temperature": -0.12,
+     "highlights": -0.84,
+     "whites": -0.6
+    },
+    "details": {
+     "vignette": 0.5,
+     "vignetteFeather": 0.7,
+     "grain": 0.1,
+     "grainSize": 0.3
+    }
+   },
+   "p85": 0.75
+  }
+ ]
+}

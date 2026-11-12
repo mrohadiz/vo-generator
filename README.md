@@ -38,7 +38,7 @@ pnpm run build              # hasil -> ../static/app
 cd ..
 ```
 
-Hanya `flask`, `numpy`, `soundfile`, dan `supertonic` yang wajib untuk memakai Supertonic. `pocket-tts` perlu ±3 GB
+Hanya `flask`, `numpy`, `soundfile`, dan `supertonic` yang wajib untuk memakai Supertonic. `faster-whisper` dan `pillow` hanya untuk `make_video.py`. `pocket-tts` perlu ±3 GB
 untuk model dan internet pada unduhan pertama. `gradio_client` hanya untuk Drama 3.
 
 Frontend memakai **FieldNote UI** (`rohadi-themes`): token warna `--fn-*`, tipografi editorial (Source Serif 4 +
@@ -186,9 +186,25 @@ selesaikan satu cerita dalam satu sesi. Bila gagal, baris otomatis dibacakan Sup
 
 ## Proyek video
 
-`videos/<judul>/` memuat resep video HyperFrames (komposisi, generator frame dan caption, pencarian B-roll Pixabay,
-penyelarasan kata Whisper). Contoh jadi: `videos/bayangan-masa-lalu` (Scene 1, 81,5 detik, 9:16). Status dan rencana
-otomasi penuh: [`docs/PLAN-video.md`](docs/PLAN-video.md). Aset dan hasil render tidak ikut git.
+Narasi per scene menjadi video 9:16 dengan B-roll Pixabay dan caption kata demi kata (HyperFrames), lewat satu perintah:
+
+```bash
+.venv/bin/python make_video.py bayangan-masa-lalu --scene 3        # satu scene
+.venv/bin/python make_video.py bayangan-masa-lalu --scenes 2-6     # beberapa scene
+.venv/bin/python make_video.py bayangan-masa-lalu --scene 3 --render   # + render (lama)
+.venv/bin/python make_video.py bayangan-masa-lalu --concat         # gabung hasil render semua scene
+```
+
+Argumen pertama adalah folder di `output/` (slug judul); hasil per scene di `videos/<judul>-sNN/`. Tahapnya: waktu per kata
+(faster-whisper CPU, diselaraskan ke naskah) → denyut cerita (AI) → B-roll (AI visi memilih dari lembar kontak) →
+perlakuan warna dari terang area caption → komposisi → `hyperframes check` dengan umpan balik kontras → snapshot dan
+tinjauan AI (panel yang tak terbaca digelapkan otomatis). Dialog dibedakan: ucapan tokoh miring dengan label nama, tokoh
+terbanyak di kiri dan lawan bicara rata kanan. Tanpa AI (`--no-ai`) jalur aturan tetap menghasilkan video. **Render tidak
+otomatis**: ±19 detik per detik video di mesin ini, jadi dijalankan hanya setelah Anda menyetujui hasil pratinjau.
+
+Kebutuhan tambahan: `pip install faster-whisper pillow`, `PIXABAY_API` di `.env`, `ffmpeg`, dan `npx` (CLI
+`hyperframes` dipakai lewat `npx`). Contoh jadi dan status: [`docs/PLAN-video.md`](docs/PLAN-video.md); Scene 1 dibuat
+manual di `videos/bayangan-masa-lalu`. Aset dan hasil render tidak ikut git.
 
 ## Struktur proyek
 
@@ -203,7 +219,9 @@ static/app/          Hasil build frontend yang disajikan Flask (dibuat oleh run.
 templates/index.html UI lama (satu berkas, JS vanilla) — tidak dipakai lagi, disimpan sebagai rujukan
 run.sh               Peluncur: bangun frontend bila perlu, lalu jalankan Flask
 queue_state.json     Cadangan antrian + statistik detik-per-kata (dibuat otomatis, tidak ikut git)
-videos/              Proyek video HyperFrames
+make_video.py        Perintah audio scene -> video 9:16 per scene
+videopipe/           Modul video: ai, align, beats, broll, grade, compose
+videos/              Proyek video HyperFrames (satu per scene; _cache untuk klip)
 docs/                Rencana dan catatan
 tts-kloning.py       Servis kloning mandiri (versi awal)
 bench_supertonic.py  Benchmark Supertonic

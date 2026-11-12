@@ -1,0 +1,69 @@
+[
+ {
+  "clip": {
+   "id": 42408,
+   "page": "https://pixabay.com/videos/id-42408/",
+   "user": "SamuelFJohanns",
+   "duration": 23,
+   "w": 1920,
+   "h": 1080,
+   "tags": "mobile phone, man, chat, dating, partner search, smartphone, app, fun, mobile, bed, internet, young, attractive, dialogue, sms, instagram, facebook, twitter, hands, digital"
+  },
+  "src": "assets/broll/B1_42408.mp4",
+  "path": "/home/rohadi/Projects/tts-narasi/videos/bayangan-masa-lalu-s03/assets/broll/B1_42408.mp4",
+  "media_start": 0.5,
+  "pos": "62% 50%",
+  "pick": {
+   "mode": "ai",
+   "model": "omniroute/agy/gemini-3.8-flash-tiered",
+   "reason": "Menampilkan sosok pria yang sedang tersenyum menatap layar ponsel di ruangan remang-remang, sangat cocok dengan narasi pesan manis ulang tahun antara Langit dan Layla.",
+   "focus_x": 58
+  },
+  "dur": 19.099999999999998
+ },
+ {
+  "clip": {
+   "id": 61706,
+   "page": "https://pixabay.com/videos/id-61706/",
+   "user": "Engin_Akyurt",
+   "duration": 27,
+   "w": 2560,
+   "h": 1440,
+   "tags": "woman, television, watch, quarantine, home, human, girl, portrait, epidemic, disease, relax, covid-19, virus, health, corona, at home, comfortable, screen, night, winter, cold, flu, depression, stress"
+  },
+  "src": "assets/broll/B2_61706.mp4",
+  "path": "/home/rohadi/Projects/tts-narasi/videos/bayangan-masa-lalu-s03/assets/broll/B2_61706.mp4",
+  "media_start": 0.5,
+  "pos": "100% 50%",
+  "pick": {
+   "mode": "ai",
+   "model": "omniroute/agy/gemini-3.8-flash-tiered",
+   "reason": "Potret wanita yang termenung dalam pencahayaan temaram menangkap secara sempurna nuansa reflektif dan perasaan bersalah Layla tanpa menatap langsung ke kamera.",
+   "focus_x": 88
+  },
+  "dur": 12.439999999999998
+ },
+ {
+  "clip": {
+   "id": 258794,
+   "page": "https://pixabay.com/videos/id-258794/",
+   "user": "Matthias_Groeneveld",
+   "duration": 44,
+   "w": 1080,
+   "h": 1920,
+   "tags": "man, walking, hiker, alone, person, solitude, solitary, morning, early, fog, winter, forest, netherlands, grass, trees, drenthe, sun, quiet, silence, calm"
+  },
+  "src": "assets/broll/B3_258794.mp4",
+  "path": "/home/rohadi/Projects/tts-narasi/videos/bayangan-masa-lalu-s03/assets/broll/B3_258794.mp4",
+  "media_start": 0.5,
+  "pos": "50% 50%",
+  "pick": {
+   "mode": "ai",
+   "model": "omniroute/agy/gemini-3.8-flash-tiered",
+   "reason": "Nuansa dingin, berkabut, dan sosok yang berjalan menjauh membelakangi kamera sangat kuat menggambarkan kesendirian batin yang masih terbelenggu masa lalu.",
+   "focus_x": 50
+  },
+  "dur": 9.859999999999996,
+  "extra_dark": 0.3
+ }
+]

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        #frame-02 { position: absolute; inset: 0; overflow: hidden; background: #0A0D12; }
+        #f02-fade { position: absolute; inset: 0; }
+        #f02-cam { position: absolute; inset: 0; transform-origin: 50% 50%; will-change: transform; }
+        #f02-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 100% 50%; }
+        
+      </style>
+      <div id="frame-02" data-composition-id="frame-02" data-width="1080" data-height="1920">
+        <div id="f02-fade">
+          <div id="f02-cam">
+            <video id="f02-video" src="assets/broll/B2_61706.mp4" muted playsinline
+              data-start="0" data-duration="12.44" data-media-start="0.5" data-track-index="0"></video>
+          </div>
+          
+        </div>
+      </div>
+      <script>
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo("#f02-fade", { opacity: 0, filter: "blur(14px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.8, ease: "sine.inOut" }, 0);
+      
+      // multi-phase-camera: skala lambat + drift mikro; satu-satunya penulis transform kamera
+      const cam = document.getElementById("f02-cam");
+      const ph = { s: 1.06 };
+      tl.to(ph, { s: 1.101, duration: 12.44, ease: "sine.inOut" }, 0);
+      const dr = { p: 0 };
+      tl.to(dr, { p: Math.PI * 2 * 1, duration: 12.44, ease: "none", onUpdate: () => {
+        const dx = Math.sin(dr.p) * 9, dy = Math.sin(dr.p * 1.3 + 1.1) * 6;
+        cam.style.transform = "translate(" + dx.toFixed(2) + "px," + dy.toFixed(2) + "px) scale(" + ph.s.toFixed(4) + ")";
+      } }, 0);
+      window.__timelines["frame-02"] = tl;
+      </script>
+    </template>
+  </body>
+</html>
